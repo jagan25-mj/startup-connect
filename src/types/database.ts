@@ -32,6 +32,28 @@ export interface StartupInterest {
   startup?: Startup;
 }
 
+export interface Match {
+  id: string;
+  startup_id: string;
+  talent_id: string;
+  score: number;
+  created_at: string;
+  updated_at: string;
+  startup?: Startup;
+  talent?: Profile;
+}
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  title: string;
+  message: string;
+  type: string;
+  read: boolean;
+  related_id: string | null;
+  created_at: string;
+}
+
 export const STAGE_LABELS: Record<StartupStage, string> = {
   idea: 'Idea Stage',
   mvp: 'MVP',
@@ -62,4 +84,27 @@ export const INDUSTRIES = [
   'Social Media',
   'Green Tech',
   'Other',
+];
+
+export const SKILLS = [
+  'JavaScript',
+  'TypeScript',
+  'React',
+  'Node.js',
+  'Python',
+  'Machine Learning',
+  'Data Science',
+  'UI/UX Design',
+  'Product Management',
+  'Marketing',
+  'Sales',
+  'Finance',
+  'Operations',
+  'Business Development',
+  'Mobile Development',
+  'DevOps',
+  'Cloud Computing',
+  'Blockchain',
+  'Healthcare',
+  'Legal',
 ];

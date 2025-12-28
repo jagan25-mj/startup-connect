@@ -3,15 +3,16 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Startup, STAGE_LABELS, STAGE_COLORS } from '@/types/database';
-import { Building2, Calendar, ArrowRight } from 'lucide-react';
+import { Building2, Calendar, ArrowRight, Sparkles } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 interface StartupCardProps {
   startup: Startup;
   interestCount?: number;
+  matchScore?: number;
 }
 
-export function StartupCard({ startup, interestCount }: StartupCardProps) {
+export function StartupCard({ startup, interestCount, matchScore }: StartupCardProps) {
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -35,9 +36,17 @@ export function StartupCard({ startup, interestCount }: StartupCardProps) {
                 <span className="text-sm text-muted-foreground">{startup.industry}</span>
               </div>
             </div>
-            <Badge className={STAGE_COLORS[startup.stage]} variant="secondary">
-              {STAGE_LABELS[startup.stage]}
-            </Badge>
+            <div className="flex flex-col items-end gap-1">
+              <Badge className={STAGE_COLORS[startup.stage]} variant="secondary">
+                {STAGE_LABELS[startup.stage]}
+              </Badge>
+              {matchScore !== undefined && matchScore > 0 && (
+                <Badge variant="outline" className="text-xs gap-1 text-primary border-primary/30">
+                  <Sparkles className="h-3 w-3" />
+                  {matchScore}% match
+                </Badge>
+              )}
+            </div>
           </div>
         </CardHeader>
 
