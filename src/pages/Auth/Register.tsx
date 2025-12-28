@@ -16,7 +16,7 @@ const registerSchema = z.object({
   fullName: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  role: z.enum(['founder', 'talent'], { required_error: 'Please select a role' }),
+  role: z.enum(['founder', 'talent', 'investor'], { required_error: 'Please select a role' }),
 });
 
 type RegisterForm = z.infer<typeof registerSchema>;
@@ -134,8 +134,8 @@ export default function Register() {
                 <Label>I am a...</Label>
                 <RadioGroup
                   value={selectedRole}
-                  onValueChange={(value) => setValue('role', value as 'founder' | 'talent')}
-                  className="grid grid-cols-2 gap-3"
+                  onValueChange={(value) => setValue('role', value as 'founder' | 'talent' | 'investor')}
+                  className="grid grid-cols-3 gap-3"
                 >
                   <Label
                     htmlFor="founder"
@@ -167,6 +167,24 @@ export default function Register() {
                     </div>
                     <span className="font-medium">Talent</span>
                     <span className="text-xs text-muted-foreground text-center">I want to join a team</span>
+                  </Label>
+
+                  <Label
+                    htmlFor="investor"
+                    className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 cursor-pointer transition-all ${
+                      selectedRole === 'investor'
+                        ? 'border-primary bg-primary/5'
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <RadioGroupItem value="investor" id="investor" className="sr-only" />
+                    <div className={`rounded-full p-2 ${selectedRole === 'investor' ? 'bg-primary/10' : 'bg-muted'}`}>
+                      <svg className={`h-5 w-5 ${selectedRole === 'investor' ? 'text-primary' : 'text-muted-foreground'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <span className="font-medium">Investor</span>
+                    <span className="text-xs text-muted-foreground text-center">I want to invest</span>
                   </Label>
                 </RadioGroup>
                 {errors.role && (

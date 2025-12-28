@@ -1,11 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, Users, Heart, Rocket } from 'lucide-react';
+import { TrendingUp, Users, Heart, Rocket, DollarSign } from 'lucide-react';
 
 interface StatsWidgetProps {
   title: string;
   value: number | string;
   description?: string;
-  icon: 'trending' | 'users' | 'heart' | 'rocket';
+  icon: 'trending' | 'users' | 'heart' | 'rocket' | 'dollar';
   trend?: number;
 }
 
@@ -15,6 +15,7 @@ export function StatsWidget({ title, value, description, icon, trend }: StatsWid
     users: Users,
     heart: Heart,
     rocket: Rocket,
+    dollar: DollarSign,
   };
 
   const iconColors = {
@@ -22,6 +23,7 @@ export function StatsWidget({ title, value, description, icon, trend }: StatsWid
     users: 'text-accent bg-accent/10',
     heart: 'text-destructive bg-destructive/10',
     rocket: 'text-primary bg-primary/10',
+    dollar: 'text-primary bg-primary/10',
   };
 
   const Icon = icons[icon];

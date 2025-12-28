@@ -1,4 +1,4 @@
-export type UserRole = 'founder' | 'talent';
+export type UserRole = 'founder' | 'talent' | 'investor';
 
 export type StartupStage = 'idea' | 'mvp' | 'early_stage' | 'growth' | 'scaling';
 
@@ -73,6 +73,15 @@ export interface Message {
   read: boolean;
   created_at: string;
   sender?: Profile;
+}
+
+export interface InvestorInterest {
+  id: string;
+  investor_id: string;
+  startup_id: string;
+  created_at: string;
+  investor?: Profile;
+  startup?: Startup;
 }
 
 export const STAGE_LABELS: Record<StartupStage, string> = {

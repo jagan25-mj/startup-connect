@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Layout } from '@/components/layout/Layout';
 import { StartupCard } from '@/components/startup/StartupCard';
@@ -9,13 +9,14 @@ import { StatsWidget } from '@/components/dashboard/StatsWidget';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Startup } from '@/types/database';
+import { Startup, Profile } from '@/types/database';
 import { useAuth } from '@/hooks/useAuth';
 import { useMatches } from '@/hooks/useMatches';
 import { Loader2, Plus, Rocket, Heart, ExternalLink } from 'lucide-react';
 
 export default function Dashboard() {
   const { user, profile } = useAuth();
+  const navigate = useNavigate();
   const { matches } = useMatches();
   const [loading, setLoading] = useState(true);
   const [myStartups, setMyStartups] = useState<Startup[]>([]);
@@ -23,41 +24,8 @@ export default function Dashboard() {
   const [interestCounts, setInterestCounts] = useState<Record<string, number>>({});
   const [totalInterests, setTotalInterests] = useState(0);
 
-  useEffect(() => {
-    if (user && profile) {
-      if (profile.role === 'founder') {
-        fetchFounderData();
-      } else {
-        fetchTalentData();
-      }
-    }
-  }, [user, profile]);
-
-  // Real-time subscription for interests
-  useEffect(() => {
-    if (!user || profile?.role !== 'founder') return;
-
-    const channel = supabase
-      .channel('interests-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'startup_interests',
-        },
-        () => {
-          fetchFounderData();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user, profile]);
-
-  const fetchFounderData = async () => {
+  // Define functions with useCallback to prevent redefinition on each render
+  const fetchFounderData = useCallback(async (): Promise<void> => {
     const { data: startups, error: startupsError } = await supabase
       .from('startups')
       .select(`
@@ -84,9 +52,10 @@ export default function Dashboard() {
       setTotalInterests(total);
     }
     setLoading(false);
-  };
+  }, [user]);
 
-  const fetchTalentData = async () => {
+  const fetchTalentData = useCallback(async (): Promise<void> => {
+    setLoading(true); // Add loading state reset
     const { data: interests, error } = await supabase
       .from('startup_interests')
       .select(`
@@ -100,12 +69,56 @@ export default function Dashboard() {
 
     if (!error && interests) {
       const startups = interests
-        .map((i: any) => i.startup)
+        .map((i: { startup: Omit<Startup, 'founder'> & { founder: { id: string; full_name: string; avatar_url: string | null; } } }) => ({
+          ...i.startup,
+          founder: i.startup.founder as Profile // Type assertion since structure is compatible
+        }))
         .filter(Boolean) as Startup[];
       setInterestedStartups(startups);
     }
     setLoading(false);
-  };
+  }, [user]);
+
+  // Redirect investors to their investor dashboard
+  useEffect(() => {
+    if (profile?.role === 'investor') {
+      navigate('/investor-dashboard');
+    }
+  }, [profile, navigate]);
+
+  useEffect(() => {
+    if (user && profile && profile.role !== 'investor') {
+      if (profile.role === 'founder') {
+        fetchFounderData();
+      } else {
+        fetchTalentData();
+      }
+    }
+  }, [user, profile, fetchFounderData, fetchTalentData]);
+
+  // Real-time subscription for interests
+  useEffect(() => {
+    if (!user || profile?.role !== 'founder') return;
+
+    const channel = supabase
+      .channel('interests-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'startup_interests',
+        },
+        () => {
+          fetchFounderData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, profile, fetchFounderData]);
 
   if (loading) {
     return (

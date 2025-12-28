@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Layout } from '@/components/layout/Layout';
@@ -40,14 +40,7 @@ export default function StartupDetail() {
 
   const isOwner = startup?.founder_id === user?.id;
 
-  useEffect(() => {
-    if (id) {
-      fetchStartup();
-      fetchInterests();
-    }
-  }, [id, user]);
-
-  const fetchStartup = async () => {
+  const fetchStartup = useCallback(async () => {
     const { data, error } = await supabase
       .from('startups')
       .select(`
@@ -61,9 +54,9 @@ export default function StartupDetail() {
       setStartup(data as unknown as Startup);
     }
     setLoading(false);
-  };
+  }, [id]);
 
-  const fetchInterests = async () => {
+  const fetchInterests = useCallback(async () => {
     if (!id) return;
 
     const { data, error } = await supabase
@@ -80,7 +73,14 @@ export default function StartupDetail() {
         setHasExpressedInterest(data.some((i) => i.user_id === user.id));
       }
     }
-  };
+  }, [id, user]);
+
+  useEffect(() => {
+    if (id) {
+      fetchStartup();
+      fetchInterests();
+    }
+  }, [id, user, fetchStartup, fetchInterests]);
 
   const handleExpressInterest = async () => {
     if (!user || !id) return;

@@ -13,6 +13,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Rocket, User, LogOut, LayoutDashboard, Plus } from 'lucide-react';
 
+
 export function Navbar() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
@@ -50,15 +51,15 @@ export function Navbar() {
           </Link>
           {user && (
             <Link 
-              to="/dashboard" 
+              to={profile?.role === 'investor' ? '/investor-dashboard' : '/dashboard'}
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
-              Dashboard
+              {profile?.role === 'investor' ? 'Investor Dashboard' : 'Dashboard'}
             </Link>
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {user ? (
             <>
               <MessagesBadge />
@@ -73,8 +74,8 @@ export function Navbar() {
               )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-                    <Avatar className="h-9 w-9 border-2 border-primary/20">
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 overflow-hidden">
+                    <Avatar className="h-10 w-10 border-2 border-primary/20">
                       <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name} />
                       <AvatarFallback className="bg-primary/10 text-primary font-medium">
                         {profile?.full_name ? getInitials(profile.full_name) : 'U'}
@@ -83,17 +84,23 @@ export function Navbar() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                  <div className="flex items-center justify-start gap-2 p-2">
-                    <div className="flex flex-col space-y-0.5">
-                      <p className="text-sm font-medium">{profile?.full_name}</p>
+                  <div className="flex items-center justify-start gap-3 p-3">
+                    <Avatar className="h-10 w-10 border-2 border-primary/20">
+                      <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name} />
+                      <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                        {profile?.full_name ? getInitials(profile.full_name) : 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{profile?.full_name}</p>
                       <p className="text-xs text-muted-foreground capitalize">{profile?.role}</p>
                     </div>
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link to="/dashboard" className="cursor-pointer">
+                    <Link to={profile?.role === 'investor' ? '/investor-dashboard' : '/dashboard'} className="cursor-pointer">
                       <LayoutDashboard className="mr-2 h-4 w-4" />
-                      Dashboard
+                      {profile?.role === 'investor' ? 'Investor Dashboard' : 'Dashboard'}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>

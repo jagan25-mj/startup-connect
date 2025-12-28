@@ -1,8 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @layer base {
   :root {
@@ -111,6 +111,11 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 220 20% 18%;
     --sidebar-ring: 217 91% 60%;
+  }
+
+  /* Set dark theme as default */
+  html {
+    @apply dark;
   }
 }
 

@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Startup, STAGE_LABELS, STAGE_COLORS } from '@/types/database';
 import { Building2, Calendar, ArrowRight, Sparkles } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { MatchScoreBreakdown } from '@/components/match/MatchScoreBreakdown';
 
 interface StartupCardProps {
   startup: Startup;
@@ -41,10 +42,7 @@ export function StartupCard({ startup, interestCount, matchScore }: StartupCardP
                 {STAGE_LABELS[startup.stage]}
               </Badge>
               {matchScore !== undefined && matchScore > 0 && (
-                <Badge variant="outline" className="text-xs gap-1 text-primary border-primary/30">
-                  <Sparkles className="h-3 w-3" />
-                  {matchScore}% match
-                </Badge>
+                <MatchScoreBreakdown score={matchScore} />
               )}
             </div>
           </div>

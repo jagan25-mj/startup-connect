@@ -5,11 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
-import { Edit, Calendar, Lightbulb, Users } from 'lucide-react';
+import { Edit, Calendar, Lightbulb, Users, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Profile() {
-  const { profile } = useAuth();
+  const { profile, profileLoading } = useAuth();
 
   const getInitials = (name: string) => {
     return name
@@ -19,6 +20,46 @@ export default function Profile() {
       .toUpperCase()
       .slice(0, 2);
   };
+
+  if (profileLoading) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-8 max-w-3xl">
+          <Card className="overflow-hidden">
+            <div className="h-32 gradient-primary" />
+            <CardContent className="relative pt-0 -mt-16 p-6">
+              <div className="flex flex-col sm:flex-row sm:items-end gap-4 mb-6">
+                <Skeleton className="h-32 w-32 rounded-full border-4 border-background" />
+                <div className="flex-1 flex flex-col sm:flex-row sm:items-center gap-4">
+                  <div className="space-y-2">
+                    <Skeleton className="h-8 w-48" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                  <Skeleton className="h-10 w-32 self-end sm:self-auto" />
+                </div>
+              </div>
+              
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <Skeleton className="h-6 w-24" />
+                  <Skeleton className="h-20 w-full" />
+                </div>
+                
+                <div className="space-y-4">
+                  <Skeleton className="h-6 w-24" />
+                  <div className="flex flex-wrap gap-2">
+                    <Skeleton className="h-8 w-20" />
+                    <Skeleton className="h-8 w-24" />
+                    <Skeleton className="h-8 w-16" />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </Layout>
+    );
+  }
 
   if (!profile) {
     return null;
@@ -48,11 +89,15 @@ export default function Profile() {
                     variant="secondary" 
                     className={profile.role === 'founder' 
                       ? 'bg-primary/10 text-primary' 
+                      : profile.role === 'investor'
+                      ? 'bg-success/10 text-success'
                       : 'bg-accent/10 text-accent'
                     }
                   >
                     {profile.role === 'founder' ? (
                       <><Lightbulb className="mr-1 h-3 w-3" /> Founder</>
+                    ) : profile.role === 'investor' ? (
+                      <><DollarSign className="mr-1 h-3 w-3" /> Investor</>
                     ) : (
                       <><Users className="mr-1 h-3 w-3" /> Talent</>
                     )}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -44,13 +44,7 @@ export default function EditStartup() {
     resolver: zodResolver(startupSchema),
   });
 
-  useEffect(() => {
-    if (id) {
-      fetchStartup();
-    }
-  }, [id]);
-
-  const fetchStartup = async () => {
+  const fetchStartup = useCallback(async () => {
     const { data, error } = await supabase
       .from('startups')
       .select('*')
@@ -67,7 +61,13 @@ export default function EditStartup() {
       });
     }
     setFetchLoading(false);
-  };
+  }, [id, reset]);
+
+  useEffect(() => {
+    if (id) {
+      fetchStartup();
+    }
+  }, [id, fetchStartup]);
 
   const onSubmit = async (data: StartupForm) => {
     if (!user || !id) return;

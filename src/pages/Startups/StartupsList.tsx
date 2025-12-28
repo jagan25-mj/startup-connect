@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Layout } from '@/components/layout/Layout';
@@ -35,14 +35,7 @@ export default function StartupsList() {
   const [sortBy, setSortBy] = useState<SortOption>('recent');
   const { user, profile } = useAuth();
 
-  useEffect(() => {
-    fetchStartups();
-    if (user && profile?.role === 'talent') {
-      fetchMatches();
-    }
-  }, [user, profile]);
-
-  const fetchStartups = async () => {
+  const fetchStartups = useCallback(async () => {
     const { data, error } = await supabase
       .from('startups')
       .select(`
@@ -55,9 +48,9 @@ export default function StartupsList() {
       setStartups(data as unknown as Startup[]);
     }
     setLoading(false);
-  };
+  }, []);
 
-  const fetchMatches = async () => {
+  const fetchMatches = useCallback(async () => {
     if (!user) return;
     
     const { data, error } = await supabase
@@ -68,12 +61,19 @@ export default function StartupsList() {
     if (!error && data) {
       setMatches(data as Match[]);
     }
-  };
+  }, [user]);
 
-  const getMatchScore = (startupId: string): number => {
+  useEffect(() => {
+    fetchStartups();
+    if (user && profile?.role === 'talent') {
+      fetchMatches();
+    }
+  }, [user, profile, fetchStartups, fetchMatches]);
+
+  const getMatchScore = useCallback((startupId: string): number => {
     const match = matches.find((m) => m.startup_id === startupId);
     return match?.score || 0;
-  };
+  }, [matches]);
 
   const filteredAndSortedStartups = useMemo(() => {
     let result = startups.filter((startup) => {
@@ -107,7 +107,7 @@ export default function StartupsList() {
     }
 
     return result;
-  }, [startups, searchQuery, industryFilter, stageFilter, skillFilters, sortBy, matches]);
+  }, [startups, searchQuery, industryFilter, stageFilter, skillFilters, sortBy, getMatchScore]);
 
   const toggleSkillFilter = (skill: string) => {
     setSkillFilters((prev) =>

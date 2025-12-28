@@ -26,7 +26,7 @@ export function useMessages(conversationId?: string) {
     if (!error && data) {
       // Process conversations to get other participant and unread count
       const processedConversations = await Promise.all(
-        data.map(async (conv: any) => {
+        data.map(async (conv: Conversation & { participant_one_profile: Partial<Profile>; participant_two_profile: Partial<Profile> }) => {
           const otherParticipant = 
             conv.participant_one === user.id 
               ? conv.participant_two_profile 
@@ -51,7 +51,7 @@ export function useMessages(conversationId?: string) {
 
           return {
             ...conv,
-            other_participant: otherParticipant,
+            other_participant: otherParticipant as Profile,
             last_message: lastMsgData,
             unread_count: count || 0,
           };

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, ArrowLeft, User, X } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const profileSchema = z.object({
   full_name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -24,25 +25,88 @@ const profileSchema = z.object({
 type ProfileForm = z.infer<typeof profileSchema>;
 
 export default function EditProfile() {
-  const { user, profile, refreshProfile } = useAuth();
+  const { user, profile, refreshProfile, profileLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [skills, setSkills] = useState<string[]>(profile?.skills || []);
+  const [skills, setSkills] = useState<string[]>([]);
   const [skillInput, setSkillInput] = useState('');
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (profile) {
+      setSkills(profile.skills || []);
+    }
+  }, [profile]);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      full_name: profile?.full_name || '',
-      bio: profile?.bio || '',
-      avatar_url: profile?.avatar_url || '',
+      full_name: '',
+      bio: '',
+      avatar_url: '',
     },
   });
+
+  // Reset form when profile loads
+  useEffect(() => {
+    if (profile) {
+      reset({
+        full_name: profile.full_name || '',
+        bio: profile.bio || '',
+        avatar_url: profile.avatar_url || '',
+      });
+    }
+  }, [profile, reset]);
+
+  if (profileLoading) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-8 max-w-2xl">
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <Skeleton className="h-6 w-32" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+            
+            <div className="space-y-2">
+              <Skeleton className="h-6 w-32" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+            
+            <div className="space-y-2">
+              <Skeleton className="h-6 w-32" />
+              <Skeleton className="h-32 w-full" />
+            </div>
+            
+            <div className="space-y-2">
+              <Skeleton className="h-6 w-32" />
+              <div className="space-y-2">
+                <Skeleton className="h-10 w-full" />
+                <div className="flex gap-2">
+                  <Skeleton className="h-8 w-24" />
+                  <Skeleton className="h-8 w-16" />
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 pt-4">
+              <Skeleton className="h-10 flex-1" />
+              <Skeleton className="h-10 flex-1" />
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!user || !profile) {
+    return null;
+  }
 
   const addSkill = () => {
     const trimmed = skillInput.trim();
