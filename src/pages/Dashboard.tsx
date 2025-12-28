@@ -3,18 +3,25 @@ import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Layout } from '@/components/layout/Layout';
 import { StartupCard } from '@/components/startup/StartupCard';
+import { RecommendedStartups } from '@/components/dashboard/RecommendedStartups';
+import { TopTalentMatches } from '@/components/dashboard/TopTalentMatches';
+import { StatsWidget } from '@/components/dashboard/StatsWidget';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Startup, StartupInterest } from '@/types/database';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Startup } from '@/types/database';
 import { useAuth } from '@/hooks/useAuth';
-import { Loader2, Plus, Rocket, Lightbulb, Users, Heart, ExternalLink } from 'lucide-react';
+import { useMatches } from '@/hooks/useMatches';
+import { Loader2, Plus, Rocket, Heart, ExternalLink } from 'lucide-react';
 
 export default function Dashboard() {
   const { user, profile } = useAuth();
+  const { matches } = useMatches();
   const [loading, setLoading] = useState(true);
   const [myStartups, setMyStartups] = useState<Startup[]>([]);
   const [interestedStartups, setInterestedStartups] = useState<Startup[]>([]);
   const [interestCounts, setInterestCounts] = useState<Record<string, number>>({});
+  const [totalInterests, setTotalInterests] = useState(0);
 
   useEffect(() => {
     if (user && profile) {
@@ -26,8 +33,31 @@ export default function Dashboard() {
     }
   }, [user, profile]);
 
+  // Real-time subscription for interests
+  useEffect(() => {
+    if (!user || profile?.role !== 'founder') return;
+
+    const channel = supabase
+      .channel('interests-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'startup_interests',
+        },
+        () => {
+          fetchFounderData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, profile]);
+
   const fetchFounderData = async () => {
-    // Fetch founder's startups
     const { data: startups, error: startupsError } = await supabase
       .from('startups')
       .select(`
@@ -40,22 +70,23 @@ export default function Dashboard() {
     if (!startupsError && startups) {
       setMyStartups(startups as unknown as Startup[]);
 
-      // Fetch interest counts for each startup
       const counts: Record<string, number> = {};
+      let total = 0;
       for (const startup of startups) {
         const { count } = await supabase
           .from('startup_interests')
           .select('*', { count: 'exact', head: true })
           .eq('startup_id', startup.id);
         counts[startup.id] = count || 0;
+        total += count || 0;
       }
       setInterestCounts(counts);
+      setTotalInterests(total);
     }
     setLoading(false);
   };
 
   const fetchTalentData = async () => {
-    // Fetch startups the talent is interested in
     const { data: interests, error } = await supabase
       .from('startup_interests')
       .select(`
@@ -79,12 +110,22 @@ export default function Dashboard() {
   if (loading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="container mx-auto px-4 py-8">
+          <Skeleton className="h-10 w-64 mb-2" />
+          <Skeleton className="h-5 w-96 mb-8" />
+          <div className="grid gap-4 md:grid-cols-4 mb-8">
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-24" />
+            ))}
+          </div>
         </div>
       </Layout>
     );
   }
+
+  const avgMatchScore = matches.length > 0 
+    ? Math.round(matches.reduce((sum, m) => sum + m.score, 0) / matches.length)
+    : 0;
 
   return (
     <Layout>
@@ -102,137 +143,129 @@ export default function Dashboard() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-3 mb-8">
-          <Card className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {profile?.role === 'founder' ? 'Your Startups' : 'Interests'}
-              </CardTitle>
-              {profile?.role === 'founder' ? (
-                <Rocket className="h-4 w-4 text-primary" />
-              ) : (
-                <Heart className="h-4 w-4 text-primary" />
-              )}
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {profile?.role === 'founder' ? myStartups.length : interestedStartups.length}
-              </div>
-            </CardContent>
-          </Card>
-
+        <div className="grid gap-4 md:grid-cols-4 mb-8">
+          <StatsWidget
+            title={profile?.role === 'founder' ? 'Your Startups' : 'Interests'}
+            value={profile?.role === 'founder' ? myStartups.length : interestedStartups.length}
+            icon={profile?.role === 'founder' ? 'rocket' : 'heart'}
+          />
+          
           {profile?.role === 'founder' && (
-            <Card className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Total Interest
-                </CardTitle>
-                <Users className="h-4 w-4 text-accent" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {Object.values(interestCounts).reduce((a, b) => a + b, 0)}
-                </div>
-              </CardContent>
-            </Card>
+            <StatsWidget
+              title="Total Interest"
+              value={totalInterests}
+              icon="users"
+              description="from talents"
+            />
           )}
 
-          <Card className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Role
-              </CardTitle>
-              {profile?.role === 'founder' ? (
-                <Lightbulb className="h-4 w-4 text-warning" />
-              ) : (
-                <Users className="h-4 w-4 text-success" />
-              )}
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold capitalize">{profile?.role}</div>
-            </CardContent>
-          </Card>
+          <StatsWidget
+            title="Top Matches"
+            value={matches.length}
+            icon="trending"
+          />
+
+          <StatsWidget
+            title="Avg Match Score"
+            value={avgMatchScore > 0 ? `${avgMatchScore}%` : 'N/A'}
+            icon="trending"
+          />
         </div>
 
-        {/* Founder Dashboard */}
-        {profile?.role === 'founder' && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Your Startups</h2>
-              <Button asChild variant="gradient">
-                <Link to="/startups/create">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create New
-                </Link>
-              </Button>
-            </div>
-
-            {myStartups.length === 0 ? (
-              <Card className="animate-fade-in">
-                <CardContent className="py-12 text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-                    <Rocket className="h-8 w-8 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-medium mb-2">No startups yet</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Create your first startup and start attracting talent
-                  </p>
+        {/* Main Content Grid */}
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Founder Dashboard */}
+            {profile?.role === 'founder' && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold">Your Startups</h2>
                   <Button asChild variant="gradient">
-                    <Link to="/startups/create">Create Your First Startup</Link>
+                    <Link to="/startups/create">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create New
+                    </Link>
                   </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {myStartups.map((startup) => (
-                  <StartupCard 
-                    key={startup.id} 
-                    startup={startup} 
-                    interestCount={interestCounts[startup.id]}
-                  />
-                ))}
+                </div>
+
+                {myStartups.length === 0 ? (
+                  <Card className="animate-fade-in">
+                    <CardContent className="py-12 text-center">
+                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+                        <Rocket className="h-8 w-8 text-primary" />
+                      </div>
+                      <h3 className="text-lg font-medium mb-2">No startups yet</h3>
+                      <p className="text-muted-foreground mb-4">
+                        Create your first startup and start attracting talent
+                      </p>
+                      <Button asChild variant="gradient">
+                        <Link to="/startups/create">Create Your First Startup</Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="grid gap-6 md:grid-cols-2">
+                    {myStartups.map((startup) => (
+                      <StartupCard 
+                        key={startup.id} 
+                        startup={startup} 
+                        interestCount={interestCounts[startup.id]}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Talent Dashboard */}
+            {profile?.role === 'talent' && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold">Your Interests</h2>
+                  <Button asChild variant="outline">
+                    <Link to="/startups">
+                      <ExternalLink className="mr-2 h-4 w-4" />
+                      Explore Startups
+                    </Link>
+                  </Button>
+                </div>
+
+                {interestedStartups.length === 0 ? (
+                  <Card className="animate-fade-in">
+                    <CardContent className="py-12 text-center">
+                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+                        <Heart className="h-8 w-8 text-primary" />
+                      </div>
+                      <h3 className="text-lg font-medium mb-2">No interests yet</h3>
+                      <p className="text-muted-foreground mb-4">
+                        Browse startups and express your interest to get started
+                      </p>
+                      <Button asChild variant="gradient">
+                        <Link to="/startups">Explore Startups</Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="grid gap-6 md:grid-cols-2">
+                    {interestedStartups.map((startup) => (
+                      <StartupCard key={startup.id} startup={startup} />
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
-        )}
 
-        {/* Talent Dashboard */}
-        {profile?.role === 'talent' && (
+          {/* Sidebar */}
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Your Interests</h2>
-              <Button asChild variant="outline">
-                <Link to="/startups">
-                  <ExternalLink className="mr-2 h-4 w-4" />
-                  Explore Startups
-                </Link>
-              </Button>
-            </div>
-
-            {interestedStartups.length === 0 ? (
-              <Card className="animate-fade-in">
-                <CardContent className="py-12 text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-                    <Heart className="h-8 w-8 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-medium mb-2">No interests yet</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Browse startups and express your interest to get started
-                  </p>
-                  <Button asChild variant="gradient">
-                    <Link to="/startups">Explore Startups</Link>
-                  </Button>
-                </CardContent>
-              </Card>
+            {profile?.role === 'talent' ? (
+              <RecommendedStartups />
             ) : (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {interestedStartups.map((startup) => (
-                  <StartupCard key={startup.id} startup={startup} />
-                ))}
-              </div>
+              <TopTalentMatches />
             )}
           </div>
-        )}
+        </div>
       </div>
     </Layout>
   );

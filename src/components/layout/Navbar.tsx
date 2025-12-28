@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -59,6 +60,7 @@ export function Navbar() {
         <div className="flex items-center gap-3">
           {user ? (
             <>
+              <NotificationBell />
               {profile?.role === 'founder' && (
                 <Button asChild variant="gradient" size="sm" className="hidden sm:flex">
                   <Link to="/startups/create">
