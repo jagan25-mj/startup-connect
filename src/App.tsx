@@ -17,6 +17,7 @@ import CreateStartup from "./pages/Startups/CreateStartup";
 import EditStartup from "./pages/Startups/EditStartup";
 import Profile from "./pages/Profile/Profile";
 import EditProfile from "./pages/Profile/EditProfile";
+import Messages from "./pages/Messages/Messages";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +71,22 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <EditProfile />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/messages" 
+              element={
+                <ProtectedRoute>
+                  <Messages />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/messages/:conversationId" 
+              element={
+                <ProtectedRoute>
+                  <Messages />
                 </ProtectedRoute>
               } 
             />

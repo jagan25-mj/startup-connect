@@ -54,6 +54,27 @@ export interface Notification {
   created_at: string;
 }
 
+export interface Conversation {
+  id: string;
+  participant_one: string;
+  participant_two: string;
+  last_message_at: string;
+  created_at: string;
+  other_participant?: Profile;
+  last_message?: Message;
+  unread_count?: number;
+}
+
+export interface Message {
+  id: string;
+  conversation_id: string;
+  sender_id: string;
+  content: string;
+  read: boolean;
+  created_at: string;
+  sender?: Profile;
+}
+
 export const STAGE_LABELS: Record<StartupStage, string> = {
   idea: 'Idea Stage',
   mvp: 'MVP',
