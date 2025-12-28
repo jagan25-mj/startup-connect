@@ -9,9 +9,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Startup, StartupInterest, STAGE_LABELS, STAGE_COLORS, Profile } from '@/types/database';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { StartChatButton } from '@/components/messages/StartChatButton';
 import { 
   Loader2, ArrowLeft, Building2, Calendar, Edit, Trash2, 
-  Heart, HeartOff, Users, Mail 
+  Heart, HeartOff, Users
 } from 'lucide-react';
 import { formatDistanceToNow, format } from 'date-fns';
 import {
@@ -289,11 +290,15 @@ export default function StartupDetail() {
                             </p>
                           </div>
                         </div>
-                        <Link to={`/profile/${interest.user_id}`}>
-                          <Button variant="outline" size="sm">
-                            View Profile
-                          </Button>
-                        </Link>
+                        <div className="flex gap-2">
+                          {interest.user && (
+                            <StartChatButton 
+                              userId={interest.user.id} 
+                              userName={interest.user.full_name}
+                              size="sm"
+                            />
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -311,7 +316,7 @@ export default function StartupDetail() {
                   <CardTitle>Founder</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-4 mb-4">
                     <Avatar className="h-14 w-14 border-2 border-primary/20">
                       <AvatarImage src={startup.founder.avatar_url || undefined} />
                       <AvatarFallback className="bg-primary/10 text-primary">
@@ -325,6 +330,14 @@ export default function StartupDetail() {
                       )}
                     </div>
                   </div>
+                  {user && !isOwner && (
+                    <StartChatButton 
+                      userId={startup.founder.id} 
+                      userName={startup.founder.full_name}
+                      variant="outline"
+                      className="w-full"
+                    />
+                  )}
                 </CardContent>
               </Card>
             )}

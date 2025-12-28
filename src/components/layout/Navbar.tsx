@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
+import { MessagesBadge } from '@/components/messages/MessagesBadge';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -57,9 +58,10 @@ export function Navbar() {
           )}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {user ? (
             <>
+              <MessagesBadge />
               <NotificationBell />
               {profile?.role === 'founder' && (
                 <Button asChild variant="gradient" size="sm" className="hidden sm:flex">

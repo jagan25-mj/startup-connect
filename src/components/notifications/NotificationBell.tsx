@@ -21,6 +21,8 @@ export function NotificationBell() {
         return '❤️';
       case 'match':
         return '✨';
+      case 'message':
+        return '💬';
       default:
         return '📢';
     }
@@ -30,6 +32,9 @@ export function NotificationBell() {
     if (notification.related_id) {
       if (notification.type === 'interest') {
         return `/startups/${notification.related_id}`;
+      }
+      if (notification.type === 'message') {
+        return `/messages/${notification.related_id}`;
       }
     }
     return '/dashboard';
