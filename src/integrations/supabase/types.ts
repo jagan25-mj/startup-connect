@@ -95,42 +95,6 @@ export type Database = {
           },
         ]
       }
-      investor_interests: {
-        Row: {
-          created_at: string
-          id: string
-          investor_id: string
-          startup_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          investor_id: string
-          startup_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          investor_id?: string
-          startup_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "investor_interests_investor_id_fkey"
-            columns: ["investor_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "investor_interests_startup_id_fkey"
-            columns: ["startup_id"]
-            isOneToOne: false
-            referencedRelation: "startups"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       messages: {
         Row: {
           content: string
