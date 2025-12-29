@@ -2,10 +2,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { AnimatePresence } from 'framer-motion';
+import { PageTransition } from './components/layout/PageTransition';
 
 
 import Index from "./pages/Index";
@@ -24,6 +26,103 @@ import InvestorDashboard from "./pages/Investor/InvestorDashboard";
 
 const queryClient = new QueryClient();
 
+const AppContent = () => {
+  const location = useLocation();
+
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<PageTransition><Index /></PageTransition>} />
+        <Route path="/auth/login" element={<PageTransition><Login /></PageTransition>} />
+        <Route path="/auth/register" element={<PageTransition><Register /></PageTransition>} />
+        <Route path="/startups" element={<PageTransition><StartupsList /></PageTransition>} />
+        <Route path="/startups/:id" element={<PageTransition><StartupDetail /></PageTransition>} />
+        <Route 
+          path="/startups/create" 
+          element={
+            <PageTransition>
+              <ProtectedRoute requiredRole="founder">
+                <CreateStartup />
+              </ProtectedRoute>
+            </PageTransition>
+          } 
+        />
+        <Route 
+          path="/startups/:id/edit" 
+          element={
+            <PageTransition>
+              <ProtectedRoute requiredRole="founder">
+                <EditStartup />
+              </ProtectedRoute>
+            </PageTransition>
+          } 
+        />
+        <Route 
+          path="/dashboard" 
+          element={
+            <PageTransition>
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            </PageTransition>
+          } 
+        />
+        <Route 
+          path="/investor-dashboard" 
+          element={
+            <PageTransition>
+              <ProtectedRoute requiredRole="investor">
+                <InvestorDashboard />
+              </ProtectedRoute>
+            </PageTransition>
+          } 
+        />
+        <Route 
+          path="/profile" 
+          element={
+            <PageTransition>
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            </PageTransition>
+          } 
+        />
+        <Route 
+          path="/profile/edit" 
+          element={
+            <PageTransition>
+              <ProtectedRoute>
+                <EditProfile />
+              </ProtectedRoute>
+            </PageTransition>
+          } 
+        />
+        <Route 
+          path="/messages" 
+          element={
+            <PageTransition>
+              <ProtectedRoute>
+                <Messages />
+              </ProtectedRoute>
+            </PageTransition>
+          } 
+        />
+        <Route 
+          path="/messages/:conversationId" 
+          element={
+            <PageTransition>
+              <ProtectedRoute>
+                <Messages />
+              </ProtectedRoute>
+            </PageTransition>
+          } 
+        />
+        <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
+      </Routes>
+    </AnimatePresence>
+  );
+};
+
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
@@ -32,78 +131,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-        <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth/login" element={<Login />} />
-            <Route path="/auth/register" element={<Register />} />
-            <Route path="/startups" element={<StartupsList />} />
-            <Route path="/startups/:id" element={<StartupDetail />} />
-            <Route 
-              path="/startups/create" 
-              element={
-                <ProtectedRoute requiredRole="founder">
-                  <CreateStartup />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/startups/:id/edit" 
-              element={
-                <ProtectedRoute requiredRole="founder">
-                  <EditStartup />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/investor-dashboard" 
-              element={
-                <ProtectedRoute requiredRole="investor">
-                  <InvestorDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/profile" 
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/profile/edit" 
-              element={
-                <ProtectedRoute>
-                  <EditProfile />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/messages" 
-              element={
-                <ProtectedRoute>
-                  <Messages />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/messages/:conversationId" 
-              element={
-                <ProtectedRoute>
-                  <Messages />
-                </ProtectedRoute>
-              } 
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+            <AppContent />
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>

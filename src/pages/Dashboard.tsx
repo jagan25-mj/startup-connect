@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Startup, Profile } from '@/types/database';
 import { useAuth } from '@/hooks/useAuth';
 import { useMatches } from '@/hooks/useMatches';
+import { motion } from 'framer-motion';
 import { Loader2, Plus, Rocket, Heart, ExternalLink } from 'lucide-react';
 
 export default function Dashboard() {
@@ -124,13 +125,19 @@ export default function Dashboard() {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-8">
-          <Skeleton className="h-10 w-64 mb-2" />
-          <Skeleton className="h-5 w-96 mb-8" />
-          <div className="grid gap-4 md:grid-cols-4 mb-8">
-            {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} className="h-24" />
-            ))}
-          </div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="space-y-8"
+          >
+            <Skeleton className="h-10 w-64 mb-2" />
+            <Skeleton className="h-5 w-96 mb-8" />
+            <div className="grid gap-4 md:grid-cols-4 mb-8">
+              {[1, 2, 3, 4].map((i) => (
+                <Skeleton key={i} className="h-24" />
+              ))}
+            </div>
+          </motion.div>
         </div>
       </Layout>
     );
@@ -144,7 +151,12 @@ export default function Dashboard() {
     <Layout>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="mb-8 animate-fade-in">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-8"
+        >
           <h1 className="text-3xl font-bold">
             Welcome back, {profile?.full_name?.split(' ')[0]}!
           </h1>
@@ -153,10 +165,15 @@ export default function Dashboard() {
               ? 'Manage your startups and connect with talent'
               : 'Track your interests and discover new opportunities'}
           </p>
-        </div>
+        </motion.div>
 
         {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-4 mb-8">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="grid gap-4 md:grid-cols-4 mb-8"
+        >
           <StatsWidget
             title={profile?.role === 'founder' ? 'Your Startups' : 'Interests'}
             value={profile?.role === 'founder' ? myStartups.length : interestedStartups.length}
@@ -183,15 +200,25 @@ export default function Dashboard() {
             value={avgMatchScore > 0 ? `${avgMatchScore}%` : 'N/A'}
             icon="trending"
           />
-        </div>
+        </motion.div>
 
         {/* Main Content Grid */}
-        <div className="grid gap-6 lg:grid-cols-3">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="grid gap-6 lg:grid-cols-3"
+        >
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Founder Dashboard */}
             {profile?.role === 'founder' && (
-              <div className="space-y-6">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                className="space-y-6"
+              >
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-semibold">Your Startups</h2>
                   <Button asChild variant="gradient">
@@ -228,12 +255,17 @@ export default function Dashboard() {
                     ))}
                   </div>
                 )}
-              </div>
+              </motion.div>
             )}
 
             {/* Talent Dashboard */}
             {profile?.role === 'talent' && (
-              <div className="space-y-6">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                className="space-y-6"
+              >
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-semibold">Your Interests</h2>
                   <Button asChild variant="outline">
@@ -266,19 +298,24 @@ export default function Dashboard() {
                     ))}
                   </div>
                 )}
-              </div>
+              </motion.div>
             )}
           </div>
+          </motion.div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            className="space-y-6"
+          >
             {profile?.role === 'talent' ? (
               <RecommendedStartups />
             ) : (
               <TopTalentMatches />
             )}
-          </div>
-        </div>
+          </motion.div>
       </div>
     </Layout>
   );

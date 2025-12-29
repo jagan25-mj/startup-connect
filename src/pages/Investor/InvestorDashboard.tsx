@@ -13,6 +13,7 @@ import { InvestorInterest } from '@/types/database';
 import { useAuth } from '@/hooks/useAuth';
 import { useMatches } from '@/hooks/useMatches';
 import { useInvestorInterests } from '@/hooks/useInvestorInterests';
+import { motion } from 'framer-motion';
 import { Loader2, Plus, Heart, DollarSign, TrendingUp, ExternalLink } from 'lucide-react';
 
 export default function InvestorDashboard() {
@@ -28,13 +29,19 @@ export default function InvestorDashboard() {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-8">
-          <Skeleton className="h-10 w-64 mb-2" />
-          <Skeleton className="h-5 w-96 mb-8" />
-          <div className="grid gap-4 md:grid-cols-4 mb-8">
-            {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} className="h-24" />
-            ))}
-          </div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="space-y-8"
+          >
+            <Skeleton className="h-10 w-64 mb-2" />
+            <Skeleton className="h-5 w-96 mb-8" />
+            <div className="grid gap-4 md:grid-cols-4 mb-8">
+              {[1, 2, 3, 4].map((i) => (
+                <Skeleton key={i} className="h-24" />
+              ))}
+            </div>
+          </motion.div>
         </div>
       </Layout>
     );
@@ -64,17 +71,27 @@ export default function InvestorDashboard() {
     <Layout>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="mb-8 animate-fade-in">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-8"
+        >
           <h1 className="text-3xl font-bold">
             Welcome back, {profile?.full_name?.split(' ')[0]}!
           </h1>
           <p className="text-muted-foreground mt-1">
             Discover and evaluate investment opportunities
           </p>
-        </div>
+        </motion.div>
 
         {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-4 mb-8">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="grid gap-4 md:grid-cols-4 mb-8"
+        >
           <StatsWidget
             title="Interests"
             value={interests.length}
@@ -99,56 +116,69 @@ export default function InvestorDashboard() {
             icon="dollar"
             description="Coming soon"
           />
-        </div>
+        </motion.div>
 
         {/* Main Content Grid */}
-        <div className="grid gap-6 lg:grid-cols-3">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="grid gap-6 lg:grid-cols-3"
+        >
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Your Interests</h2>
-                <Button asChild variant="outline">
-                  <Link to="/startups">
-                    <ExternalLink className="mr-2 h-4 w-4" />
-                    Browse Startups
-                  </Link>
-                </Button>
-              </div>
-
-              {interests.length === 0 ? (
-                <Card className="animate-fade-in">
-                  <CardContent className="py-12 text-center">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-                      <Heart className="h-8 w-8 text-primary" />
-                    </div>
-                    <h3 className="text-lg font-medium mb-2">No investments yet</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Browse startups and express your interest to get started
-                    </p>
-                    <Button asChild variant="gradient">
-                      <Link to="/startups">Explore Startups</Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid gap-6 md:grid-cols-2">
-                  {interests.map((interest) => (
-                    <StartupCard 
-                      key={interest.id} 
-                      startup={interest.startup} 
-                    />
-                  ))}
-                </div>
-              )}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="lg:col-span-2 space-y-6"
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Your Interests</h2>
+              <Button asChild variant="outline">
+                <Link to="/startups">
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Browse Startups
+                </Link>
+              </Button>
             </div>
-          </div>
+
+            {interests.length === 0 ? (
+              <Card className="animate-fade-in">
+                <CardContent className="py-12 text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+                    <Heart className="h-8 w-8 text-primary" />
+                  </div>
+                  <h3 className="text-lg font-medium mb-2">No investments yet</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Browse startups and express your interest to get started
+                  </p>
+                  <Button asChild variant="gradient">
+                    <Link to="/startups">Explore Startups</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-6 md:grid-cols-2">
+                {interests.map((interest) => (
+                  <StartupCard 
+                    key={interest.id} 
+                    startup={interest.startup} 
+                  />
+                ))}
+              </div>
+            )}
+          </motion.div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            className="space-y-6"
+          >
             <RecommendedStartups />
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
     </Layout>
   );

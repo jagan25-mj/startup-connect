@@ -35,6 +35,12 @@ export default function Register() {
     formState: { errors },
   } = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
+    defaultValues: {
+      fullName: '',
+      email: '',
+      password: '',
+      role: undefined,
+    },
   });
 
   const selectedRole = watch('role');
@@ -133,7 +139,7 @@ export default function Register() {
               <div className="space-y-3">
                 <Label>I am a...</Label>
                 <RadioGroup
-                  value={selectedRole}
+                  value={selectedRole || ''}
                   onValueChange={(value) => setValue('role', value as 'founder' | 'talent' | 'investor')}
                   className="grid grid-cols-3 gap-3"
                 >

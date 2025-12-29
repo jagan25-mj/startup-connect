@@ -39,29 +39,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    supabase.auth.onAuthStateChange((event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        setTimeout(() => {
-          fetchProfile(session.user.id);
-        }, 0);
-      } else {
-        setProfile(null);
+    let isMounted = true;
+    let initialLoadComplete = false;
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (isMounted) {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          setTimeout(() => {
+            if (isMounted) {
+              fetchProfile(session.user.id);
+            }
+          }, 0);
+        } else {
+          setProfile(null);
+        }
+        
+        // Only set loading to false after initial load
+        if (initialLoadComplete) {
+          setLoading(false);
+        }
       }
-      setLoading(false);
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        fetchProfile(session.user.id);
+      if (isMounted) {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          fetchProfile(session.user.id);
+        }
+        setLoading(false);
+        initialLoadComplete = true;
       }
-      setLoading(false);
     });
+    
+    return () => {
+      isMounted = false;
+      subscription?.unsubscribe();
+    };
   }, []);
 
   const signUp = async (email: string, password: string, fullName: string, role: 'founder' | 'talent' | 'investor') => {
