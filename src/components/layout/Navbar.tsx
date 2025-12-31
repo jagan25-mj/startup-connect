@@ -68,6 +68,18 @@ export function Navbar() {
               Explore Startups
             </Link>
           </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.25 }}
+          >
+            <Link
+              to="/feed"
+              className="text-sm font-medium text-muted-foreground transition-all duration-300 hover:text-foreground hover:scale-105"
+            >
+              Activity Feed
+            </Link>
+          </motion.div>
           {user && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
