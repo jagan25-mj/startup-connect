@@ -11,10 +11,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { INDUSTRIES, STAGE_LABELS, StartupStage } from '@/types/database';
+import { INDUSTRIES, STAGE_LABELS, StartupStage, SKILLS } from '@/types/database';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ArrowLeft, Rocket } from 'lucide-react';
+import { Loader2, ArrowLeft, Rocket, X, Users } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 const startupSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(100),
@@ -27,6 +28,8 @@ type StartupForm = z.infer<typeof startupSchema>;
 
 export default function CreateStartup() {
   const [isLoading, setIsLoading] = useState(false);
+  const [requiredSkills, setRequiredSkills] = useState<string[]>([]);
+  const [skillInput, setSkillInput] = useState('');
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -48,7 +51,7 @@ export default function CreateStartup() {
     if (!user) return;
 
     setIsLoading(true);
-    
+
     const { data: startup, error } = await supabase
       .from('startups')
       .insert({
@@ -57,7 +60,8 @@ export default function CreateStartup() {
         industry: data.industry,
         stage: data.stage,
         founder_id: user.id,
-      })
+        required_skills: requiredSkills,
+      } as any)
       .select()
       .single();
 
@@ -82,8 +86,8 @@ export default function CreateStartup() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8 max-w-2xl">
-        <Link 
-          to="/startups" 
+        <Link
+          to="/startups"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -138,8 +142,8 @@ export default function CreateStartup() {
 
                 <div className="space-y-2">
                   <Label>Stage</Label>
-                  <Select 
-                    defaultValue="idea" 
+                  <Select
+                    defaultValue="idea"
                     onValueChange={(value) => setValue('stage', value as StartupStage)}
                   >
                     <SelectTrigger>
@@ -154,6 +158,49 @@ export default function CreateStartup() {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+
+              {/* Required Skills Section */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Skills You're Looking For
+                </Label>
+                <Select onValueChange={(skill) => {
+                  if (!requiredSkills.includes(skill) && requiredSkills.length < 10) {
+                    setRequiredSkills([...requiredSkills, skill]);
+                  }
+                }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Add skills you need" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SKILLS.filter(s => !requiredSkills.includes(s)).map((skill) => (
+                      <SelectItem key={skill} value={skill}>
+                        {skill}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {requiredSkills.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {requiredSkills.map((skill) => (
+                      <Badge key={skill} variant="secondary" className="gap-1">
+                        {skill}
+                        <button
+                          type="button"
+                          onClick={() => setRequiredSkills(requiredSkills.filter(s => s !== skill))}
+                          className="ml-1 hover:text-destructive"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Select skills to help match with talent
+                </p>
               </div>
 
               <div className="space-y-2">

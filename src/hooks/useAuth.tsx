@@ -9,7 +9,7 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   profileLoading: boolean;
-  signUp: (email: string, password: string, fullName: string, role: 'founder' | 'talent' | 'investor') => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, fullName: string, role: 'founder' | 'talent') => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -31,7 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .select('*')
       .eq('id', userId)
       .maybeSingle();
-    
+
     if (!error && data) {
       setProfile(data as Profile);
     }
@@ -41,12 +41,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let isMounted = true;
     let initialLoadComplete = false;
-    
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (isMounted) {
         setSession(session);
         setUser(session?.user ?? null);
-        
+
         if (session?.user) {
           setTimeout(() => {
             if (isMounted) {
@@ -56,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           setProfile(null);
         }
-        
+
         // Only set loading to false after initial load
         if (initialLoadComplete) {
           setLoading(false);
@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (isMounted) {
         setSession(session);
         setUser(session?.user ?? null);
-        
+
         if (session?.user) {
           fetchProfile(session.user.id);
         }
@@ -76,16 +76,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         initialLoadComplete = true;
       }
     });
-    
+
     return () => {
       isMounted = false;
       subscription?.unsubscribe();
     };
   }, []);
 
-  const signUp = async (email: string, password: string, fullName: string, role: 'founder' | 'talent' | 'investor') => {
+  const signUp = async (email: string, password: string, fullName: string, role: 'founder' | 'talent') => {
     const redirectUrl = `${window.location.origin}/`;
-    
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -97,7 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         },
       },
     });
-    
+
     return { error: error as Error | null };
   };
 
@@ -106,7 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email,
       password,
     });
-    
+
     return { error: error as Error | null };
   };
 

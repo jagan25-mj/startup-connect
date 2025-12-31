@@ -18,7 +18,7 @@ export function useMatches() {
 
   const fetchMatches = useCallback(async () => {
     if (!user || !profile) return;
-    
+
     setLoading(true);
     setError(null);
 
@@ -52,7 +52,7 @@ export function useMatches() {
 
         if (startups && startups.length > 0) {
           const startupIds = startups.map((s) => s.id);
-          
+
           const { data, error } = await supabase
             .from('matches')
             .select(`

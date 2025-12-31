@@ -22,7 +22,7 @@ import EditStartup from "./pages/Startups/EditStartup";
 import Profile from "./pages/Profile/Profile";
 import EditProfile from "./pages/Profile/EditProfile";
 import Messages from "./pages/Messages/Messages";
-import InvestorDashboard from "./pages/Investor/InvestorDashboard";
+
 
 const queryClient = new QueryClient();
 
@@ -37,85 +37,75 @@ const AppContent = () => {
         <Route path="/auth/register" element={<PageTransition><Register /></PageTransition>} />
         <Route path="/startups" element={<PageTransition><StartupsList /></PageTransition>} />
         <Route path="/startups/:id" element={<PageTransition><StartupDetail /></PageTransition>} />
-        <Route 
-          path="/startups/create" 
+        <Route
+          path="/startups/create"
           element={
             <PageTransition>
               <ProtectedRoute requiredRole="founder">
                 <CreateStartup />
               </ProtectedRoute>
             </PageTransition>
-          } 
+          }
         />
-        <Route 
-          path="/startups/:id/edit" 
+        <Route
+          path="/startups/:id/edit"
           element={
             <PageTransition>
               <ProtectedRoute requiredRole="founder">
                 <EditStartup />
               </ProtectedRoute>
             </PageTransition>
-          } 
+          }
         />
-        <Route 
-          path="/dashboard" 
+        <Route
+          path="/dashboard"
           element={
             <PageTransition>
               <ProtectedRoute>
                 <Dashboard />
               </ProtectedRoute>
             </PageTransition>
-          } 
+          }
         />
-        <Route 
-          path="/investor-dashboard" 
-          element={
-            <PageTransition>
-              <ProtectedRoute requiredRole="investor">
-                <InvestorDashboard />
-              </ProtectedRoute>
-            </PageTransition>
-          } 
-        />
-        <Route 
-          path="/profile" 
+        <Route
+          path="/profile"
           element={
             <PageTransition>
               <ProtectedRoute>
                 <Profile />
               </ProtectedRoute>
             </PageTransition>
-          } 
+          }
         />
-        <Route 
-          path="/profile/edit" 
+        <Route
+          path="/profile/edit"
           element={
             <PageTransition>
               <ProtectedRoute>
                 <EditProfile />
               </ProtectedRoute>
             </PageTransition>
-          } 
+          }
         />
-        <Route 
-          path="/messages" 
+        <Route
+          path="/messages"
           element={
             <PageTransition>
               <ProtectedRoute>
                 <Messages />
               </ProtectedRoute>
             </PageTransition>
-          } 
+          }
         />
-        <Route 
-          path="/messages/:conversationId" 
+        <Route
+          path="/messages/:conversationId"
           element={
             <PageTransition>
               <ProtectedRoute>
                 <Messages />
               </ProtectedRoute>
             </PageTransition>
-          } 
+          }
         />
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
       </Routes>

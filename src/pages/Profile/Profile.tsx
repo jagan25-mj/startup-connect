@@ -5,9 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
-import { Edit, Calendar, Lightbulb, Users, DollarSign } from 'lucide-react';
+import { Edit, Calendar, Lightbulb, Users, Github, Linkedin } from 'lucide-react';
 import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
+import { TrustScore } from '@/components/trust/TrustScore';
+import { TrustBadge } from '@/components/trust/TrustBadge';
+import { IntentBadges } from '@/components/trust/IntentBadges';
+import { EndorsementSummary } from '@/components/trust/EndorseButton';
 
 export default function Profile() {
   const { profile, profileLoading } = useAuth();
@@ -38,13 +42,13 @@ export default function Profile() {
                   <Skeleton className="h-10 w-32 self-end sm:self-auto" />
                 </div>
               </div>
-              
+
               <div className="space-y-6">
                 <div className="space-y-4">
                   <Skeleton className="h-6 w-24" />
                   <Skeleton className="h-20 w-full" />
                 </div>
-                
+
                 <div className="space-y-4">
                   <Skeleton className="h-6 w-24" />
                   <div className="flex flex-wrap gap-2">
@@ -71,7 +75,7 @@ export default function Profile() {
         <Card className="animate-fade-in overflow-hidden">
           {/* Header/Banner */}
           <div className="h-32 gradient-primary" />
-          
+
           {/* Profile Content */}
           <CardContent className="relative pt-0 -mt-16">
             <div className="flex flex-col sm:flex-row sm:items-end gap-4 mb-6">
@@ -81,34 +85,31 @@ export default function Profile() {
                   {getInitials(profile.full_name)}
                 </AvatarFallback>
               </Avatar>
-              
+
               <div className="flex-1 pb-2">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                   <h1 className="text-2xl font-bold">{profile.full_name}</h1>
-                  <Badge 
-                    variant="secondary" 
-                    className={profile.role === 'founder' 
-                      ? 'bg-primary/10 text-primary' 
-                      : profile.role === 'investor'
-                      ? 'bg-success/10 text-success'
+                  <Badge
+                    variant="secondary"
+                    className={profile.role === 'founder'
+                      ? 'bg-primary/10 text-primary'
                       : 'bg-accent/10 text-accent'
                     }
                   >
                     {profile.role === 'founder' ? (
                       <><Lightbulb className="mr-1 h-3 w-3" /> Founder</>
-                    ) : profile.role === 'investor' ? (
-                      <><DollarSign className="mr-1 h-3 w-3" /> Investor</>
                     ) : (
                       <><Users className="mr-1 h-3 w-3" /> Talent</>
                     )}
                   </Badge>
+                  <TrustBadge profile={profile} size="sm" />
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                   <Calendar className="h-4 w-4" />
                   Joined {format(new Date(profile.created_at), 'MMMM yyyy')}
                 </div>
               </div>
-              
+
               <Button asChild variant="outline">
                 <Link to="/profile/edit">
                   <Edit className="mr-2 h-4 w-4" />
@@ -117,6 +118,32 @@ export default function Profile() {
               </Button>
             </div>
 
+            {/* Trust & Intent Section */}
+            <div className="flex flex-wrap items-center gap-4 mb-6 p-4 rounded-lg bg-muted/30">
+              <TrustScore profile={profile} size="md" />
+              <div className="h-10 w-px bg-border hidden sm:block" />
+              <div className="flex flex-col gap-2">
+                <IntentBadges profile={profile} size="md" />
+                <EndorsementSummary endorsementCount={profile.endorsement_count || 0} />
+              </div>
+              {(profile.github_url || profile.linkedin_url) && (
+                <>
+                  <div className="h-10 w-px bg-border hidden sm:block" />
+                  <div className="flex items-center gap-2">
+                    {profile.github_url && (
+                      <a href={profile.github_url} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors">
+                        <Github className="h-5 w-5" />
+                      </a>
+                    )}
+                    {profile.linkedin_url && (
+                      <a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors">
+                        <Linkedin className="h-5 w-5" />
+                      </a>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
             {/* Bio */}
             <Card className="mb-6">
               <CardHeader>
@@ -153,6 +180,6 @@ export default function Profile() {
           </CardContent>
         </Card>
       </div>
-    </Layout>
+    </Layout >
   );
 }

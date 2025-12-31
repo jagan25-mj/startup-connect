@@ -3,12 +3,12 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { MessagesBadge } from '@/components/messages/MessagesBadge';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Rocket, User, LogOut, LayoutDashboard, Plus } from 'lucide-react';
@@ -38,14 +38,14 @@ export function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/70 backdrop-blur-xl supports-[backdrop-filter]:bg-background/50 shadow-sm shadow-black/5">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-2 transition-all duration-300 hover:opacity-80 hover:scale-[1.02]">
-          <motion.div 
+          <motion.div
             className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
             <Rocket className="h-5 w-5 text-primary-foreground" />
           </motion.div>
-          <motion.span 
+          <motion.span
             className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent"
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
@@ -61,8 +61,8 @@ export function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.2 }}
           >
-            <Link 
-              to="/startups" 
+            <Link
+              to="/startups"
               className="text-sm font-medium text-muted-foreground transition-all duration-300 hover:text-foreground hover:scale-105"
             >
               Explore Startups
@@ -74,11 +74,11 @@ export function Navbar() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.3 }}
             >
-              <Link 
-                to={profile?.role === 'investor' ? '/investor-dashboard' : '/dashboard'}
+              <Link
+                to="/dashboard"
                 className="text-sm font-medium text-muted-foreground transition-all duration-300 hover:text-foreground hover:scale-105"
               >
-                {profile?.role === 'investor' ? 'Investor Dashboard' : 'Dashboard'}
+                Dashboard
               </Link>
             </motion.div>
           )}
@@ -97,10 +97,10 @@ export function Navbar() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Button 
-                    asChild 
-                    variant="gradient" 
-                    size="sm" 
+                  <Button
+                    asChild
+                    variant="gradient"
+                    size="sm"
                     className="hidden sm:flex transition-all duration-300 hover:scale-105"
                   >
                     <Link to="/startups/create">
@@ -138,9 +138,9 @@ export function Navbar() {
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link to={profile?.role === 'investor' ? '/investor-dashboard' : '/dashboard'} className="cursor-pointer">
+                    <Link to="/dashboard" className="cursor-pointer">
                       <LayoutDashboard className="mr-2 h-4 w-4" />
-                      {profile?.role === 'investor' ? 'Investor Dashboard' : 'Dashboard'}
+                      Dashboard
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>

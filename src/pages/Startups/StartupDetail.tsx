@@ -10,11 +10,13 @@ import { Startup, StartupInterest, STAGE_LABELS, STAGE_COLORS, Profile } from '@
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { StartChatButton } from '@/components/messages/StartChatButton';
-import { 
-  Loader2, ArrowLeft, Building2, Calendar, Edit, Trash2, 
+import {
+  Loader2, ArrowLeft, Building2, Calendar, Edit, Trash2,
   Heart, HeartOff, Users
 } from 'lucide-react';
 import { formatDistanceToNow, format } from 'date-fns';
+import { TeamHealth, FillsSkillGapBadge } from '@/components/startup/TeamHealth';
+import { talentFillsSkillGap } from '@/lib/skillGap';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -86,7 +88,7 @@ export default function StartupDetail() {
     if (!user || !id) return;
 
     setActionLoading(true);
-    
+
     if (hasExpressedInterest) {
       const { error } = await supabase
         .from('startup_interests')
@@ -128,7 +130,7 @@ export default function StartupDetail() {
         fetchInterests();
       }
     }
-    
+
     setActionLoading(false);
   };
 
@@ -190,8 +192,8 @@ export default function StartupDetail() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
-        <Link 
-          to="/startups" 
+        <Link
+          to="/startups"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -292,8 +294,8 @@ export default function StartupDetail() {
                         </div>
                         <div className="flex gap-2">
                           {interest.user && (
-                            <StartChatButton 
-                              userId={interest.user.id} 
+                            <StartChatButton
+                              userId={interest.user.id}
                               userName={interest.user.full_name}
                               size="sm"
                             />
@@ -331,8 +333,8 @@ export default function StartupDetail() {
                     </div>
                   </div>
                   {user && !isOwner && (
-                    <StartChatButton 
-                      userId={startup.founder.id} 
+                    <StartChatButton
+                      userId={startup.founder.id}
                       userName={startup.founder.full_name}
                       variant="outline"
                       className="w-full"
@@ -346,8 +348,8 @@ export default function StartupDetail() {
             {user && !isOwner && (
               <Card className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
                 <CardContent className="pt-6">
-                  <Button 
-                    onClick={handleExpressInterest} 
+                  <Button
+                    onClick={handleExpressInterest}
                     variant={hasExpressedInterest ? 'outline' : 'gradient'}
                     className="w-full"
                     disabled={actionLoading}
@@ -361,13 +363,30 @@ export default function StartupDetail() {
                     )}
                     {hasExpressedInterest ? 'Remove Interest' : 'Express Interest'}
                   </Button>
+                  {/* Skill Gap Badge for Talent */}
+                  {profile?.role === 'talent' && profile?.skills && startup && (() => {
+                    const gapAnalysis = talentFillsSkillGap(profile.skills, startup);
+                    return gapAnalysis.fills ? (
+                      <div className="mt-3 flex justify-center">
+                        <FillsSkillGapBadge matchedSkills={gapAnalysis.matchedSkills} />
+                      </div>
+                    ) : null;
+                  })()}
                   <p className="text-xs text-muted-foreground text-center mt-3">
-                    {hasExpressedInterest 
+                    {hasExpressedInterest
                       ? 'The founder knows you\'re interested'
                       : 'Let the founder know you\'re interested in joining'}
                   </p>
                 </CardContent>
               </Card>
+            )}
+
+            {/* Team Health - Only visible to owner */}
+            {isOwner && startup && (
+              <TeamHealth
+                startup={startup}
+                interestedTalentSkills={interests.flatMap(i => i.user?.skills || [])}
+              />
             )}
 
             {!user && (

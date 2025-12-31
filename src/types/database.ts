@@ -1,4 +1,4 @@
-export type UserRole = 'founder' | 'talent' | 'investor';
+export type UserRole = 'founder' | 'talent';
 
 export type StartupStage = 'idea' | 'mvp' | 'early_stage' | 'growth' | 'scaling';
 
@@ -10,6 +10,17 @@ export interface Profile {
   skills: string[];
   avatar_url: string | null;
   created_at: string;
+  // Trust & transparency fields
+  looking_for: string | null;
+  availability: 'full_time' | 'part_time' | 'consulting' | 'not_available' | null;
+  commitment_type: 'cofounder' | 'employee' | 'contractor' | 'advisor' | null;
+  github_url: string | null;
+  linkedin_url: string | null;
+  email_verified: boolean;
+  last_active_at: string | null;
+  trust_score: number;
+  profile_completeness: number;
+  endorsement_count: number;
 }
 
 export interface Startup {
@@ -21,6 +32,9 @@ export interface Startup {
   founder_id: string;
   created_at: string;
   founder?: Profile;
+  // Skill gap fields
+  required_skills: string[];
+  team_skills: string[];
 }
 
 export interface StartupInterest {
@@ -75,13 +89,29 @@ export interface Message {
   sender?: Profile;
 }
 
-export interface InvestorInterest {
+// Trust & Safety Types
+export type EndorsementType = 'skill' | 'work_ethic' | 'collaboration';
+export type ReportReason = 'spam' | 'fake_profile' | 'harassment' | 'misuse' | 'other';
+export type AvailabilityType = 'full_time' | 'part_time' | 'consulting' | 'not_available';
+export type CommitmentType = 'cofounder' | 'employee' | 'contractor' | 'advisor';
+
+export interface Endorsement {
   id: string;
-  investor_id: string;
-  startup_id: string;
+  endorser_id: string;
+  endorsed_id: string;
+  type: EndorsementType;
   created_at: string;
-  investor?: Profile;
-  startup?: Startup;
+  endorser?: Profile;
+}
+
+export interface UserReport {
+  id: string;
+  reporter_id: string;
+  reported_id: string;
+  reason: ReportReason;
+  details: string | null;
+  status: 'pending' | 'reviewed' | 'resolved' | 'dismissed';
+  created_at: string;
 }
 
 export const STAGE_LABELS: Record<StartupStage, string> = {

@@ -80,15 +80,8 @@ export default function Dashboard() {
     setLoading(false);
   }, [user]);
 
-  // Redirect investors to their investor dashboard
   useEffect(() => {
-    if (profile?.role === 'investor') {
-      navigate('/investor-dashboard');
-    }
-  }, [profile, navigate]);
-
-  useEffect(() => {
-    if (user && profile && profile.role !== 'investor') {
+    if (user && profile) {
       if (profile.role === 'founder') {
         fetchFounderData();
       } else {
@@ -143,7 +136,7 @@ export default function Dashboard() {
     );
   }
 
-  const avgMatchScore = matches.length > 0 
+  const avgMatchScore = matches.length > 0
     ? Math.round(matches.reduce((sum, m) => sum + m.score, 0) / matches.length)
     : 0;
 
@@ -151,7 +144,7 @@ export default function Dashboard() {
     <Layout>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -161,14 +154,14 @@ export default function Dashboard() {
             Welcome back, {profile?.full_name?.split(' ')[0]}!
           </h1>
           <p className="text-muted-foreground mt-1">
-            {profile?.role === 'founder' 
+            {profile?.role === 'founder'
               ? 'Manage your startups and connect with talent'
               : 'Track your interests and discover new opportunities'}
           </p>
         </motion.div>
 
         {/* Stats Cards */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
@@ -179,7 +172,7 @@ export default function Dashboard() {
             value={profile?.role === 'founder' ? myStartups.length : interestedStartups.length}
             icon={profile?.role === 'founder' ? 'rocket' : 'heart'}
           />
-          
+
           {profile?.role === 'founder' && (
             <StatsWidget
               title="Total Interest"
@@ -203,7 +196,7 @@ export default function Dashboard() {
         </motion.div>
 
         {/* Main Content Grid */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
@@ -213,7 +206,7 @@ export default function Dashboard() {
           <div className="lg:col-span-2 space-y-6">
             {/* Founder Dashboard */}
             {profile?.role === 'founder' && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
@@ -247,9 +240,9 @@ export default function Dashboard() {
                 ) : (
                   <div className="grid gap-6 md:grid-cols-2">
                     {myStartups.map((startup) => (
-                      <StartupCard 
-                        key={startup.id} 
-                        startup={startup} 
+                      <StartupCard
+                        key={startup.id}
+                        startup={startup}
                         interestCount={interestCounts[startup.id]}
                       />
                     ))}
@@ -260,7 +253,7 @@ export default function Dashboard() {
 
             {/* Talent Dashboard */}
             {profile?.role === 'talent' && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
@@ -301,21 +294,21 @@ export default function Dashboard() {
               </motion.div>
             )}
           </div>
-          </motion.div>
+        </motion.div>
 
-          {/* Sidebar */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            className="space-y-6"
-          >
-            {profile?.role === 'talent' ? (
-              <RecommendedStartups />
-            ) : (
-              <TopTalentMatches />
-            )}
-          </motion.div>
+        {/* Sidebar */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+          className="space-y-6"
+        >
+          {profile?.role === 'talent' ? (
+            <RecommendedStartups />
+          ) : (
+            <TopTalentMatches />
+          )}
+        </motion.div>
       </div>
     </Layout>
   );
