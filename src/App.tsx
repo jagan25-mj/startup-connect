@@ -22,7 +22,6 @@ import EditStartup from "./pages/Startups/EditStartup";
 import Profile from "./pages/Profile/Profile";
 import EditProfile from "./pages/Profile/EditProfile";
 import Messages from "./pages/Messages/Messages";
-import Feed from "./pages/Feed/Feed";
 
 
 const queryClient = new QueryClient();
@@ -37,7 +36,6 @@ const AppContent = () => {
         <Route path="/auth/login" element={<PageTransition><Login /></PageTransition>} />
         <Route path="/auth/register" element={<PageTransition><Register /></PageTransition>} />
         <Route path="/startups" element={<PageTransition><StartupsList /></PageTransition>} />
-        <Route path="/feed" element={<PageTransition><Feed /></PageTransition>} />
         <Route path="/startups/:id" element={<PageTransition><StartupDetail /></PageTransition>} />
         <Route
           path="/startups/create"
