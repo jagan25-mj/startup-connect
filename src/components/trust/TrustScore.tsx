@@ -9,6 +9,27 @@ interface TrustScoreProps {
     showLabel?: boolean;
 }
 
+// Calculate trust score based on available profile data
+function calculateTrustScore(profile: Profile): number {
+    let score = 0;
+    
+    // Profile completeness (40 points)
+    if (profile.full_name && profile.full_name.length > 2) score += 10;
+    if (profile.bio && profile.bio.length > 20) score += 15;
+    if (profile.skills && profile.skills.length > 0) score += 15;
+    
+    // Avatar (10 points)
+    if (profile.avatar_url) score += 10;
+    
+    // Account age (30 points)
+    score += getAccountAgePoints(profile.created_at);
+    
+    // Base activity score (20 points for having a profile)
+    score += 20;
+    
+    return Math.min(100, score);
+}
+
 function getScoreColor(score: number): string {
     if (score >= 80) return 'text-green-500';
     if (score >= 60) return 'text-blue-500';
@@ -31,8 +52,8 @@ function getScoreLabel(score: number): string {
 }
 
 export function TrustScore({ profile, size = 'md', showLabel = true }: TrustScoreProps) {
-    const score = profile.trust_score || 0;
-    const circumference = 2 * Math.PI * 20; // radius = 20
+    const score = calculateTrustScore(profile);
+    const circumference = 2 * Math.PI * 20;
     const strokeDashoffset = circumference - (score / 100) * circumference;
 
     const sizeClasses = {
@@ -48,11 +69,12 @@ export function TrustScore({ profile, size = 'md', showLabel = true }: TrustScor
     };
 
     const breakdownItems = [
-        { label: 'Profile', value: profile.profile_completeness >= 80 ? 30 : Math.floor(profile.profile_completeness * 0.3), max: 30 },
-        { label: 'Linked Accounts', value: (profile.github_url ? 10 : 0) + (profile.linkedin_url ? 10 : 0), max: 20 },
-        { label: 'Account Age', value: getAccountAgePoints(profile.created_at), max: 20 },
-        { label: 'Activity', value: profile.last_active_at && isRecentlyActive(profile.last_active_at) ? 15 : 0, max: 15 },
-        { label: 'Endorsements', value: Math.min(15, (profile.endorsement_count || 0) * 3), max: 15 },
+        { label: 'Name', value: profile.full_name && profile.full_name.length > 2 ? 10 : 0, max: 10 },
+        { label: 'Bio', value: profile.bio && profile.bio.length > 20 ? 15 : 0, max: 15 },
+        { label: 'Skills', value: profile.skills && profile.skills.length > 0 ? 15 : 0, max: 15 },
+        { label: 'Avatar', value: profile.avatar_url ? 10 : 0, max: 10 },
+        { label: 'Account Age', value: getAccountAgePoints(profile.created_at), max: 30 },
+        { label: 'Base', value: 20, max: 20 },
     ];
 
     return (
@@ -61,7 +83,6 @@ export function TrustScore({ profile, size = 'md', showLabel = true }: TrustScor
                 <div className="flex items-center gap-2 cursor-help">
                     <div className={cn('relative', sizeClasses[size])}>
                         <svg className="w-full h-full -rotate-90">
-                            {/* Background circle */}
                             <circle
                                 cx="50%"
                                 cy="50%"
@@ -70,7 +91,6 @@ export function TrustScore({ profile, size = 'md', showLabel = true }: TrustScor
                                 className="stroke-muted"
                                 strokeWidth="3"
                             />
-                            {/* Progress circle */}
                             <circle
                                 cx="50%"
                                 cy="50%"
@@ -119,7 +139,7 @@ export function TrustScore({ profile, size = 'md', showLabel = true }: TrustScor
                     </div>
                     <div className="pt-2 border-t text-xs text-muted-foreground flex items-center gap-1">
                         <Info className="h-3 w-3" />
-                        Score updates automatically
+                        Complete your profile to increase score
                     </div>
                 </div>
             </TooltipContent>
@@ -133,19 +153,16 @@ function getAccountAgePoints(createdAt: string): number {
     const daysSinceCreation = (now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
 
     let points = 0;
+    if (daysSinceCreation >= 7) points += 10;
     if (daysSinceCreation >= 30) points += 10;
     if (daysSinceCreation >= 90) points += 10;
     return points;
 }
 
-function isRecentlyActive(lastActiveAt: string): boolean {
-    const lastActive = new Date(lastActiveAt);
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    return lastActive > sevenDaysAgo;
-}
-
 // Compact version for cards
-export function TrustScoreCompact({ score }: { score: number }) {
+export function TrustScoreCompact({ profile }: { profile: Profile }) {
+    const score = calculateTrustScore(profile);
+    
     return (
         <Tooltip>
             <TooltipTrigger asChild>
