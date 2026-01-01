@@ -70,9 +70,9 @@ export default function Dashboard() {
 
     if (!error && interests) {
       const startups = interests
-        .map((i: { startup: Omit<Startup, 'founder'> & { founder: { id: string; full_name: string; avatar_url: string | null; } } }) => ({
+        .map((i) => ({
           ...i.startup,
-          founder: i.startup.founder as Profile // Type assertion since structure is compatible
+          founder: i.startup.founder as Profile
         }))
         .filter(Boolean) as Startup[];
       setInterestedStartups(startups);

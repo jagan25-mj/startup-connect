@@ -294,9 +294,14 @@ export function analyzeProfileStartupMatch(
         problem: startup.description,
         targetUsers: '',
         stage: startup.stage,
-        requiredSkills: startup.required_skills || [],
+        requiredSkills: [], // Inferred from stage in matching logic
         industry: startup.industry,
     };
+
+    // Filter out 'not_available' for matching purposes
+    const availability = candidate.availability;
+    const matchAvailability: 'full_time' | 'part_time' | 'consulting' = 
+        availability === 'not_available' || !availability ? 'part_time' : availability;
 
     const candidateProfile: CandidateProfile = {
         name: candidate.full_name,
@@ -304,7 +309,7 @@ export function analyzeProfileStartupMatch(
         secondarySkills: candidate.skills?.slice(3) || [],
         experience: candidate.bio || '',
         interests: [startup.industry],
-        availability: candidate.availability || 'part_time',
+        availability: matchAvailability,
     };
 
     const existingTeam: TeamMember[] = existingTeamSkills.length > 0 ? [{

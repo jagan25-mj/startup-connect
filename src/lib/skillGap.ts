@@ -1,4 +1,4 @@
-import { Startup, Profile, SKILLS } from '@/types/database';
+import { Startup, SKILLS } from '@/types/database';
 
 // Skill categories for role suggestions
 const SKILL_ROLE_MAP: Record<string, string[]> = {
@@ -39,20 +39,18 @@ export interface SkillGapAnalysis {
 
 /**
  * Calculate skill gap analysis for a startup
+ * Uses stage-based skill requirements since startups don't have explicit required_skills
  */
 export function calculateSkillGap(
     startup: Startup,
     interestedTalentSkills: string[] = []
 ): SkillGapAnalysis {
-    // Get required skills from startup or infer from stage
-    const requiredSkills = startup.required_skills?.length > 0
-        ? startup.required_skills
-        : STAGE_SKILL_REQUIREMENTS[startup.stage] || [];
+    // Infer required skills from startup stage
+    const requiredSkills = STAGE_SKILL_REQUIREMENTS[startup.stage] || [];
 
-    // Get team skills from startup + founder + interested talent
+    // Get team skills from founder + interested talent
     const founderSkills = startup.founder?.skills || [];
     const teamSkills = [
-        ...(startup.team_skills || []),
         ...founderSkills,
         ...interestedTalentSkills,
     ];
@@ -63,8 +61,8 @@ export function calculateSkillGap(
 
     // Find missing skills
     const missingSkills = uniqueRequiredSkills.filter(
-        skill => !uniqueTeamSkills.some(
-            teamSkill => teamSkill.toLowerCase() === skill.toLowerCase()
+        (skill: string) => !uniqueTeamSkills.some(
+            (teamSkill: string) => teamSkill.toLowerCase() === skill.toLowerCase()
         )
     );
 
@@ -77,7 +75,7 @@ export function calculateSkillGap(
 
     // Suggest roles based on missing skills
     const suggestedRoles: string[] = [];
-    missingSkills.forEach(skill => {
+    missingSkills.forEach((skill: string) => {
         const roles = SKILL_ROLE_MAP[skill];
         if (roles) {
             suggestedRoles.push(roles[0]); // Add primary role suggestion
@@ -87,8 +85,8 @@ export function calculateSkillGap(
     // Stage-based recommendations
     const stageRecommendations = STAGE_SKILL_REQUIREMENTS[startup.stage] || [];
     const stageBasedRecommendations = stageRecommendations.filter(
-        skill => !uniqueTeamSkills.some(
-            teamSkill => teamSkill.toLowerCase() === skill.toLowerCase()
+        (skill: string) => !uniqueTeamSkills.some(
+            (teamSkill: string) => teamSkill.toLowerCase() === skill.toLowerCase()
         )
     );
 
