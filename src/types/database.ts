@@ -32,9 +32,6 @@ export interface Startup {
   founder_id: string;
   created_at: string;
   founder?: Profile;
-  // Skill gap fields
-  required_skills: string[];
-  team_skills: string[];
 }
 
 export interface StartupInterest {
