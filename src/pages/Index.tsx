@@ -7,7 +7,10 @@ import {
   Rocket, Users, Lightbulb, ArrowRight,
   Zap, Shield, Globe, Sparkles, Quote, Heart, Code, TrendingUp
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, Suspense, lazy } from 'react';
+
+// Lazy load 3D component for performance
+const HeroVisuals = lazy(() => import('@/components/3d/HeroVisuals').then(m => ({ default: m.HeroVisuals })));
 
 export default function Index() {
   const { user } = useAuth();
@@ -21,7 +24,12 @@ export default function Index() {
         <div className="absolute inset-0 gradient-glow" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent" />
 
-        {/* Floating Elements */}
+        {/* 3D Visuals - Lazy Loaded */}
+        <Suspense fallback={null}>
+          <HeroVisuals className="opacity-60" />
+        </Suspense>
+
+        {/* Floating Elements (fallback/enhancement) */}
         <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-float" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
 

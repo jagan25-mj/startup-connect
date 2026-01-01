@@ -78,10 +78,19 @@ export function TeamHealth({ startup, interestedTalentSkills = [], compact = fal
                             {analysis.completionPercentage}%
                         </span>
                     </div>
-                    <div className="relative h-2 rounded-full bg-muted overflow-hidden">
+                    <div className="relative h-3 rounded-full bg-muted/50 overflow-hidden">
                         <div
-                            className={cn('h-full transition-all duration-500', getProgressColor(analysis.completionPercentage))}
-                            style={{ width: `${analysis.completionPercentage}%` }}
+                            className={cn(
+                                'h-full transition-all duration-700 ease-out rounded-full',
+                                analysis.completionPercentage >= 80 ? 'bg-gradient-to-r from-green-500 to-emerald-400' :
+                                    analysis.completionPercentage >= 60 ? 'bg-gradient-to-r from-blue-500 to-cyan-400' :
+                                        analysis.completionPercentage >= 40 ? 'bg-gradient-to-r from-amber-500 to-yellow-400' :
+                                            'bg-gradient-to-r from-red-500 to-orange-400'
+                            )}
+                            style={{
+                                width: `${analysis.completionPercentage}%`,
+                                boxShadow: analysis.completionPercentage >= 60 ? '0 0 12px currentColor' : 'none'
+                            }}
                         />
                     </div>
                 </div>
