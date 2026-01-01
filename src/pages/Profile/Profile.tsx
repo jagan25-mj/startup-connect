@@ -5,13 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
-import { Edit, Calendar, Lightbulb, Users, Github, Linkedin } from 'lucide-react';
+import { Edit, Calendar, Lightbulb, Users } from 'lucide-react';
 import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TrustScore } from '@/components/trust/TrustScore';
 import { TrustBadge } from '@/components/trust/TrustBadge';
 import { IntentBadges } from '@/components/trust/IntentBadges';
-import { EndorsementSummary } from '@/components/trust/EndorseButton';
 
 export default function Profile() {
   const { profile, profileLoading } = useAuth();
@@ -122,28 +121,9 @@ export default function Profile() {
             <div className="flex flex-wrap items-center gap-4 mb-6 p-4 rounded-lg bg-muted/30">
               <TrustScore profile={profile} size="md" />
               <div className="h-10 w-px bg-border hidden sm:block" />
-              <div className="flex flex-col gap-2">
-                <IntentBadges profile={profile} size="md" />
-                <EndorsementSummary endorsementCount={profile.endorsement_count || 0} />
-              </div>
-              {(profile.github_url || profile.linkedin_url) && (
-                <>
-                  <div className="h-10 w-px bg-border hidden sm:block" />
-                  <div className="flex items-center gap-2">
-                    {profile.github_url && (
-                      <a href={profile.github_url} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors">
-                        <Github className="h-5 w-5" />
-                      </a>
-                    )}
-                    {profile.linkedin_url && (
-                      <a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors">
-                        <Linkedin className="h-5 w-5" />
-                      </a>
-                    )}
-                  </div>
-                </>
-              )}
+              <IntentBadges profile={profile} size="md" />
             </div>
+
             {/* Bio */}
             <Card className="mb-6">
               <CardHeader>
@@ -153,7 +133,7 @@ export default function Profile() {
                 {profile.bio ? (
                   <p className="text-muted-foreground whitespace-pre-wrap">{profile.bio}</p>
                 ) : (
-                  <p className="text-muted-foreground italic">No bio added yet</p>
+                  <p className="text-muted-foreground italic">No bio added yet. Tell others about yourself!</p>
                 )}
               </CardContent>
             </Card>
@@ -173,13 +153,13 @@ export default function Profile() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-muted-foreground italic">No skills added yet</p>
+                  <p className="text-muted-foreground italic">No skills added yet. Add your skills to get better matches!</p>
                 )}
               </CardContent>
             </Card>
           </CardContent>
         </Card>
       </div>
-    </Layout >
+    </Layout>
   );
 }

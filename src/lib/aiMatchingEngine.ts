@@ -298,18 +298,13 @@ export function analyzeProfileStartupMatch(
         industry: startup.industry,
     };
 
-    // Filter out 'not_available' for matching purposes
-    const availability = candidate.availability;
-    const matchAvailability: 'full_time' | 'part_time' | 'consulting' = 
-        availability === 'not_available' || !availability ? 'part_time' : availability;
-
     const candidateProfile: CandidateProfile = {
         name: candidate.full_name,
         primarySkills: candidate.skills?.slice(0, 3) || [],
         secondarySkills: candidate.skills?.slice(3) || [],
         experience: candidate.bio || '',
         interests: [startup.industry],
-        availability: matchAvailability,
+        availability: 'part_time', // Default availability
     };
 
     const existingTeam: TeamMember[] = existingTeamSkills.length > 0 ? [{
