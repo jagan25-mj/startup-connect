@@ -39,8 +39,8 @@ export default function Index() {
             </h1>
 
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-              LaunchPad connects visionary founders with exceptional talent.
-              Share your startup, discover opportunities, and build something extraordinary.
+              LaunchPad connects visionary founders with exceptional talent using
+              AI-assisted insights. We surface the matches — you make the decisions.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-slide-up" style={{ animationDelay: '0.2s' }}>

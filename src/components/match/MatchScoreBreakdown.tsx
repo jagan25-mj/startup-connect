@@ -41,9 +41,9 @@ export function MatchScoreBreakdown({
         <TooltipContent side="right" className="w-80 p-4">
           <div className="space-y-3">
             <div>
-              <p className="font-semibold mb-2">Match Score Breakdown</p>
+              <p className="font-semibold mb-2">Compatibility Insights</p>
               <p className="text-xs text-muted-foreground mb-3">
-                This score is calculated based on three key factors:
+                This score helps you understand potential fit. The final decision is always yours.
               </p>
             </div>
 
@@ -100,9 +100,12 @@ export function MatchScoreBreakdown({
 
             <div className="pt-2 border-t">
               <div className="flex items-center justify-between text-sm font-semibold">
-                <span>Total Match Score</span>
+                <span>Compatibility Score</span>
                 <span className="text-primary">{score}%</span>
               </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Use this as a starting point for your evaluation.
+              </p>
             </div>
           </div>
         </TooltipContent>

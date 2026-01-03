@@ -106,7 +106,7 @@ export function TeamHealth({ startup, interestedTalentSkills = [], compact = fal
                     <div className="space-y-2">
                         <div className="flex items-center gap-2 text-sm font-medium">
                             <AlertCircle className="h-4 w-4 text-amber-500" />
-                            Missing Skills
+                            Skills to Consider
                         </div>
                         <div className="flex flex-wrap gap-1.5">
                             {analysis.missingSkills.map((skill) => (
@@ -153,7 +153,7 @@ export function TeamHealth({ startup, interestedTalentSkills = [], compact = fal
                     <div className="space-y-2 pt-2 border-t">
                         <div className="flex items-center gap-2 text-sm font-medium">
                             <TrendingUp className="h-4 w-4 text-primary" />
-                            Suggested Hires
+                            Consider Hiring
                         </div>
                         <div className="flex flex-wrap gap-1.5">
                             {analysis.suggestedRoles.slice(0, 4).map((role) => (

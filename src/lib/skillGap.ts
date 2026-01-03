@@ -129,23 +129,23 @@ export function getCompletionMessage(
     suggestedRoles: string[]
 ): string {
     if (completionPercentage >= 100) {
-        return "Your team has all the key skills covered!";
+        return "Your team has strong skill coverage. You're well-positioned!";
     }
 
     if (completionPercentage >= 80) {
-        return "Your team is almost complete. Consider adding specialized skills.";
+        return "Your team looks well-rounded. You might consider specialized skills as you grow.";
     }
 
     if (completionPercentage >= 60) {
         const nextRole = suggestedRoles[0] || "a specialist";
-        return `You're 60% there. Adding ${nextRole} could accelerate your growth.`;
+        return `Good progress! Our insights suggest ${nextRole} could help accelerate your goals.`;
     }
 
     if (completionPercentage >= 40) {
-        return "Your core team is forming. Focus on filling key gaps.";
+        return "Your core team is forming. Consider which gaps matter most to you.";
     }
 
-    return "You're just getting started. Focus on your most critical hires first.";
+    return "Early stage! Focus on what feels most critical for your vision.";
 }
 
 /**

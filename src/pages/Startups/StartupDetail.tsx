@@ -17,6 +17,8 @@ import {
 import { formatDistanceToNow, format } from 'date-fns';
 import { TeamHealth, FillsSkillGapBadge } from '@/components/startup/TeamHealth';
 import { talentFillsSkillGap } from '@/lib/skillGap';
+import { EndorseButton } from '@/components/trust/EndorseButton';
+import { ReportButton } from '@/components/trust/ReportButton';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -333,12 +335,28 @@ export default function StartupDetail() {
                     </div>
                   </div>
                   {user && !isOwner && (
-                    <StartChatButton
-                      userId={startup.founder.id}
-                      userName={startup.founder.full_name}
-                      variant="outline"
-                      className="w-full"
-                    />
+                    <div className="space-y-3">
+                      <div className="flex gap-2">
+                        <StartChatButton
+                          userId={startup.founder.id}
+                          userName={startup.founder.full_name}
+                          variant="outline"
+                          className="flex-1"
+                        />
+                        <EndorseButton
+                          userId={startup.founder.id}
+                          userName={startup.founder.full_name}
+                          size="md"
+                        />
+                      </div>
+                      <div className="flex justify-end">
+                        <ReportButton
+                          userId={startup.founder.id}
+                          userName={startup.founder.full_name}
+                          variant="text"
+                        />
+                      </div>
+                    </div>
                   )}
                 </CardContent>
               </Card>

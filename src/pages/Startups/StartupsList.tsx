@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Startup, INDUSTRIES, STAGE_LABELS, SKILLS, Match } from '@/types/database';
 import { useAuth } from '@/hooks/useAuth';
-import { Loader2, Search, Plus, Rocket, X, SlidersHorizontal, Sparkles } from 'lucide-react';
+import { Loader2, Search, Plus, Rocket, X, SlidersHorizontal, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -33,7 +33,9 @@ export default function StartupsList() {
   const [stageFilter, setStageFilter] = useState<string>('all');
   const [skillFilters, setSkillFilters] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<SortOption>('recent');
+  const [currentPage, setCurrentPage] = useState(1);
   const { user, profile } = useAuth();
+  const ITEMS_PER_PAGE = 12;
 
   const fetchStartups = useCallback(async () => {
     const { data, error } = await supabase
@@ -52,7 +54,7 @@ export default function StartupsList() {
 
   const fetchMatches = useCallback(async () => {
     if (!user) return;
-    
+
     const { data, error } = await supabase
       .from('matches')
       .select('*')
@@ -77,17 +79,17 @@ export default function StartupsList() {
 
   const filteredAndSortedStartups = useMemo(() => {
     let result = startups.filter((startup) => {
-      const matchesSearch = 
+      const matchesSearch =
         startup.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         startup.description.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesIndustry = industryFilter === 'all' || startup.industry === industryFilter;
       const matchesStage = stageFilter === 'all' || startup.stage === stageFilter;
-      
+
       // Skill filter - check if founder has any of the selected skills
-      const matchesSkills = skillFilters.length === 0 || 
-        (startup.founder?.skills && 
+      const matchesSkills = skillFilters.length === 0 ||
+        (startup.founder?.skills &&
           skillFilters.some(skill => startup.founder?.skills?.includes(skill)));
-      
+
       return matchesSearch && matchesIndustry && matchesStage && matchesSkills;
     });
 
@@ -101,7 +103,7 @@ export default function StartupsList() {
         break;
       case 'recent':
       default:
-        result = result.sort((a, b) => 
+        result = result.sort((a, b) =>
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
     }
@@ -124,6 +126,18 @@ export default function StartupsList() {
   };
 
   const hasActiveFilters = searchQuery || industryFilter !== 'all' || stageFilter !== 'all' || skillFilters.length > 0;
+
+  // Pagination
+  const totalPages = Math.ceil(filteredAndSortedStartups.length / ITEMS_PER_PAGE);
+  const paginatedStartups = filteredAndSortedStartups.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, industryFilter, stageFilter, skillFilters, sortBy]);
 
   return (
     <Layout>
@@ -157,7 +171,7 @@ export default function StartupsList() {
               className="pl-10"
             />
           </div>
-          
+
           <div className="flex gap-2 flex-wrap">
             <Select value={industryFilter} onValueChange={setIndustryFilter}>
               <SelectTrigger className="w-full md:w-40">
@@ -256,33 +270,33 @@ export default function StartupsList() {
             {industryFilter !== 'all' && (
               <Badge variant="secondary" className="gap-1">
                 {industryFilter}
-                <X 
-                  className="h-3 w-3 cursor-pointer" 
-                  onClick={() => setIndustryFilter('all')} 
+                <X
+                  className="h-3 w-3 cursor-pointer"
+                  onClick={() => setIndustryFilter('all')}
                 />
               </Badge>
             )}
             {stageFilter !== 'all' && (
               <Badge variant="secondary" className="gap-1">
                 {STAGE_LABELS[stageFilter as keyof typeof STAGE_LABELS]}
-                <X 
-                  className="h-3 w-3 cursor-pointer" 
-                  onClick={() => setStageFilter('all')} 
+                <X
+                  className="h-3 w-3 cursor-pointer"
+                  onClick={() => setStageFilter('all')}
                 />
               </Badge>
             )}
             {skillFilters.map((skill) => (
               <Badge key={skill} variant="secondary" className="gap-1">
                 {skill}
-                <X 
-                  className="h-3 w-3 cursor-pointer" 
-                  onClick={() => toggleSkillFilter(skill)} 
+                <X
+                  className="h-3 w-3 cursor-pointer"
+                  onClick={() => toggleSkillFilter(skill)}
                 />
               </Badge>
             ))}
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={clearFilters}
               className="text-xs h-6"
             >
@@ -328,15 +342,46 @@ export default function StartupsList() {
             )}
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredAndSortedStartups.map((startup) => (
-              <StartupCard 
-                key={startup.id} 
-                startup={startup} 
-                matchScore={profile?.role === 'talent' ? getMatchScore(startup.id) : undefined}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {paginatedStartups.map((startup) => (
+                <StartupCard
+                  key={startup.id}
+                  startup={startup}
+                  matchScore={profile?.role === 'talent' ? getMatchScore(startup.id) : undefined}
+                />
+              ))}
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-4 mt-8">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="gap-1"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Previous
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="gap-1"
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </Layout>
