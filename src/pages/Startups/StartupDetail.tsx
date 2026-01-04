@@ -286,6 +286,7 @@ export default function StartupDetail() {
             {isOwner && id && (
               <InterestedTalentList
                 startupId={id}
+                startupName={startup.name}
                 interests={interests}
               />
             )}
@@ -296,6 +297,7 @@ export default function StartupDetail() {
                 showUpdateForm ? (
                   <StartupUpdateForm
                     startupId={startup.id}
+                    startupName={startup.name}
                     onSuccess={() => setShowUpdateForm(false)}
                     onCancel={() => setShowUpdateForm(false)}
                   />
