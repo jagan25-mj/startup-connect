@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Profile } from '@/types/database';
-import { notifyConnectionRequest, notifyConnectionAccepted } from '@/lib/emailNotifications';
+// Email notifications disabled for MVP - only in-app notifications active
 
 export interface Connection {
   id: string;
@@ -108,20 +108,6 @@ export function useConnections() {
   const sendConnectionRequest = async (receiverId: string) => {
     if (!user) return { success: false };
 
-    // Get receiver profile for email notification
-    const { data: receiverProfile } = await supabase
-      .from('profiles')
-      .select('full_name')
-      .eq('id', receiverId)
-      .single();
-
-    // Get current user profile for sender name
-    const { data: senderProfile } = await supabase
-      .from('profiles')
-      .select('full_name')
-      .eq('id', user.id)
-      .single();
-
     const { error } = await supabase
       .from('connections')
       .insert({
@@ -150,16 +136,7 @@ export function useConnections() {
       title: 'Request sent!',
       description: 'Your connection request has been sent.',
     });
-
-    // Send email notification (non-blocking)
-    if (receiverProfile && senderProfile) {
-      notifyConnectionRequest(
-        receiverId,
-        receiverProfile.full_name,
-        senderProfile.full_name,
-        user.id
-      ).catch(console.error);
-    }
+    // Note: Email notifications disabled for MVP - only in-app notifications active
     
     await fetchConnections();
     return { success: true };
@@ -167,9 +144,6 @@ export function useConnections() {
 
   const acceptConnection = async (connectionId: string) => {
     if (!user) return { success: false };
-
-    // Get the connection to find the requester
-    const connection = pendingRequests.find(c => c.id === connectionId);
     
     const { error } = await supabase
       .from('connections')
@@ -189,24 +163,7 @@ export function useConnections() {
       title: 'Connected!',
       description: 'You are now connected.',
     });
-
-    // Send email notification (non-blocking)
-    if (connection?.requester) {
-      const { data: accepterProfile } = await supabase
-        .from('profiles')
-        .select('full_name')
-        .eq('id', user.id)
-        .single();
-
-      if (accepterProfile) {
-        notifyConnectionAccepted(
-          connection.requester_id,
-          connection.requester.full_name,
-          accepterProfile.full_name,
-          user.id
-        ).catch(console.error);
-      }
-    }
+    // Note: Email notifications disabled for MVP - only in-app notifications active
     
     await fetchConnections();
     return { success: true };

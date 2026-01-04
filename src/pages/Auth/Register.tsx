@@ -10,7 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
-import { Rocket, Loader2, ArrowLeft, Lightbulb, Users } from 'lucide-react';
+import { Loader2, ArrowLeft, Lightbulb, Users } from 'lucide-react';
+import collabhubLogo from '@/assets/collabhub-logo.png';
 
 const registerSchema = z.object({
   fullName: z.string().min(2, 'Name must be at least 2 characters'),
@@ -85,9 +86,7 @@ export default function Register() {
 
         <Card className="border-border/50 shadow-2xl">
           <CardHeader className="text-center pb-4">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl gradient-primary shadow-glow">
-              <Rocket className="h-7 w-7 text-primary-foreground" />
-            </div>
+            <img src={collabhubLogo} alt="CollabHub" className="h-14 w-14 rounded-xl shadow-glow" />
             <CardTitle className="text-2xl">Create your account</CardTitle>
             <CardDescription>Join the CollabHub community today</CardDescription>
           </CardHeader>

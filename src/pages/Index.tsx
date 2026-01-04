@@ -4,9 +4,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { motion } from 'framer-motion';
 import { 
-  ArrowRight, Rocket, Users, Target, Shield, 
+  ArrowRight, Users, Target, Shield, 
   Sparkles, CheckCircle2, Star, Quote
 } from 'lucide-react';
+import collabhubLogo from '@/assets/collabhub-logo.png';
 
 export default function Index() {
   const { user } = useAuth();
@@ -276,9 +277,7 @@ export default function Index() {
         <div className="container px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center">
-                <Rocket className="h-4 w-4 text-primary-foreground" />
-              </div>
+              <img src={collabhubLogo} alt="CollabHub" className="h-8 w-8 rounded-lg" />
               <span className="font-bold">CollabHub</span>
             </div>
             <p className="text-sm text-muted-foreground">
