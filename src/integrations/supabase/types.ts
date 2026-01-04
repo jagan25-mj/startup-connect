@@ -214,13 +214,62 @@ export type Database = {
           },
         ]
       }
+      profile_achievements: {
+        Row: {
+          achievement_type: string
+          created_at: string
+          description: string | null
+          id: string
+          proof_link: string | null
+          title: string
+          updated_at: string
+          user_id: string
+          year: number | null
+        }
+        Insert: {
+          achievement_type: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          proof_link?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+          year?: number | null
+        }
+        Update: {
+          achievement_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          proof_link?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_achievements_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           bio: string | null
           created_at: string
           full_name: string
+          github_url: string | null
           id: string
+          linkedin_url: string | null
+          resume_filename: string | null
+          resume_uploaded_at: string | null
+          resume_url: string | null
           role: Database["public"]["Enums"]["user_role"]
           skills: string[] | null
         }
@@ -229,7 +278,12 @@ export type Database = {
           bio?: string | null
           created_at?: string
           full_name: string
+          github_url?: string | null
           id: string
+          linkedin_url?: string | null
+          resume_filename?: string | null
+          resume_uploaded_at?: string | null
+          resume_url?: string | null
           role: Database["public"]["Enums"]["user_role"]
           skills?: string[] | null
         }
@@ -238,7 +292,12 @@ export type Database = {
           bio?: string | null
           created_at?: string
           full_name?: string
+          github_url?: string | null
           id?: string
+          linkedin_url?: string | null
+          resume_filename?: string | null
+          resume_uploaded_at?: string | null
+          resume_url?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           skills?: string[] | null
         }

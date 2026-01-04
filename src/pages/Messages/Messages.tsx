@@ -186,20 +186,25 @@ export default function Messages() {
                   >
                     <ArrowLeft className="h-5 w-5" />
                   </Button>
-                  <Avatar className="h-10 w-10 border-2 border-primary/20">
-                    <AvatarImage
-                      src={currentConversation.other_participant?.avatar_url || undefined}
-                    />
-                    <AvatarFallback className="bg-primary/10 text-primary">
-                      {currentConversation.other_participant?.full_name
-                        ? getInitials(currentConversation.other_participant.full_name)
-                        : '?'}
-                    </AvatarFallback>
-                  </Avatar>
+                  <Link to={`/profile/${currentConversation.other_participant?.id}`}>
+                    <Avatar className="h-10 w-10 border-2 border-primary/20 hover:ring-2 hover:ring-primary/30 transition-all cursor-pointer">
+                      <AvatarImage
+                        src={currentConversation.other_participant?.avatar_url || undefined}
+                      />
+                      <AvatarFallback className="bg-primary/10 text-primary">
+                        {currentConversation.other_participant?.full_name
+                          ? getInitials(currentConversation.other_participant.full_name)
+                          : '?'}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Link>
                   <div>
-                    <p className="font-medium">
+                    <Link 
+                      to={`/profile/${currentConversation.other_participant?.id}`}
+                      className="font-medium hover:text-primary transition-colors"
+                    >
                       {currentConversation.other_participant?.full_name}
-                    </p>
+                    </Link>
                     <p className="text-xs text-muted-foreground capitalize">
                       {currentConversation.other_participant?.role}
                     </p>

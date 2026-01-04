@@ -20,6 +20,7 @@ import StartupDetail from "./pages/Startups/StartupDetail";
 import CreateStartup from "./pages/Startups/CreateStartup";
 import EditStartup from "./pages/Startups/EditStartup";
 import Profile from "./pages/Profile/Profile";
+import PublicProfile from "./pages/Profile/PublicProfile";
 import EditProfile from "./pages/Profile/EditProfile";
 import Messages from "./pages/Messages/Messages";
 
@@ -73,6 +74,16 @@ const AppContent = () => {
             <PageTransition>
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/profile/:id"
+          element={
+            <PageTransition>
+              <ProtectedRoute>
+                <PublicProfile />
               </ProtectedRoute>
             </PageTransition>
           }

@@ -1,38 +1,55 @@
-import { Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Layout } from '@/components/layout/Layout';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
-import { Edit, Calendar, Lightbulb, Users, Github, Linkedin, ExternalLink } from 'lucide-react';
-import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TrustScore } from '@/components/trust/TrustScore';
 import { TrustBadge } from '@/components/trust/TrustBadge';
 import { IntentBadges } from '@/components/trust/IntentBadges';
-import { ResumeSection } from '@/components/profile/ResumeSection';
 import { AchievementCard } from '@/components/profile/AchievementCard';
-import type { ProfileAchievement } from '@/types/database';
+import { ResumeSection } from '@/components/profile/ResumeSection';
+import { StartChatButton } from '@/components/messages/StartChatButton';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { Calendar, Lightbulb, Users, Github, Linkedin, ArrowLeft, ExternalLink } from 'lucide-react';
+import { format } from 'date-fns';
+import type { Profile, ProfileAchievement } from '@/types/database';
 
-export default function Profile() {
-  const { profile, profileLoading, user } = useAuth();
+export default function PublicProfile() {
+  const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
+
+  const { data: profile, isLoading: profileLoading } = useQuery({
+    queryKey: ['public-profile', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (error) throw error;
+      return data as Profile;
+    },
+    enabled: !!id,
+  });
 
   const { data: achievements, isLoading: achievementsLoading } = useQuery({
-    queryKey: ['my-achievements', user?.id],
+    queryKey: ['profile-achievements', id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('profile_achievements')
         .select('*')
-        .eq('user_id', user!.id)
+        .eq('user_id', id)
         .order('year', { ascending: false });
       
       if (error) throw error;
       return data as ProfileAchievement[];
     },
-    enabled: !!user?.id,
+    enabled: !!id,
   });
 
   const getInitials = (name: string) => {
@@ -44,6 +61,8 @@ export default function Profile() {
       .slice(0, 2);
   };
 
+  const isOwnProfile = user?.id === id;
+
   if (profileLoading) {
     return (
       <Layout>
@@ -53,29 +72,14 @@ export default function Profile() {
             <CardContent className="relative pt-0 -mt-16 p-6">
               <div className="flex flex-col sm:flex-row sm:items-end gap-4 mb-6">
                 <Skeleton className="h-32 w-32 rounded-full border-4 border-background" />
-                <div className="flex-1 flex flex-col sm:flex-row sm:items-center gap-4">
-                  <div className="space-y-2">
-                    <Skeleton className="h-8 w-48" />
-                    <Skeleton className="h-4 w-32" />
-                  </div>
-                  <Skeleton className="h-10 w-32 self-end sm:self-auto" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-8 w-48" />
+                  <Skeleton className="h-4 w-32" />
                 </div>
               </div>
-
               <div className="space-y-6">
-                <div className="space-y-4">
-                  <Skeleton className="h-6 w-24" />
-                  <Skeleton className="h-20 w-full" />
-                </div>
-
-                <div className="space-y-4">
-                  <Skeleton className="h-6 w-24" />
-                  <div className="flex flex-wrap gap-2">
-                    <Skeleton className="h-8 w-20" />
-                    <Skeleton className="h-8 w-24" />
-                    <Skeleton className="h-8 w-16" />
-                  </div>
-                </div>
+                <Skeleton className="h-20 w-full" />
+                <Skeleton className="h-32 w-full" />
               </div>
             </CardContent>
           </Card>
@@ -85,12 +89,35 @@ export default function Profile() {
   }
 
   if (!profile) {
-    return null;
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-8 max-w-3xl">
+          <Card className="p-8 text-center">
+            <h2 className="text-xl font-semibold mb-2">Profile not found</h2>
+            <p className="text-muted-foreground mb-4">This user doesn't exist or has been removed.</p>
+            <Button asChild variant="outline">
+              <Link to="/dashboard">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Dashboard
+              </Link>
+            </Button>
+          </Card>
+        </div>
+      </Layout>
+    );
   }
 
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8 max-w-3xl">
+        {/* Back button */}
+        <Button asChild variant="ghost" size="sm" className="mb-4">
+          <Link to="/dashboard">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back
+          </Link>
+        </Button>
+
         <Card className="animate-fade-in overflow-hidden">
           {/* Header/Banner */}
           <div className="h-32 gradient-primary" />
@@ -129,7 +156,7 @@ export default function Profile() {
                 </div>
 
                 {/* Social Links */}
-                <div className="flex items-center gap-3 mt-2">
+                <div className="flex items-center gap-2 mt-2">
                   {profile.github_url && (
                     <a
                       href={profile.github_url}
@@ -157,12 +184,16 @@ export default function Profile() {
                 </div>
               </div>
 
-              <Button asChild variant="outline">
-                <Link to="/profile/edit">
-                  <Edit className="mr-2 h-4 w-4" />
-                  Edit Profile
-                </Link>
-              </Button>
+              {/* Action Buttons */}
+              <div className="flex gap-2">
+                {isOwnProfile ? (
+                  <Button asChild variant="outline">
+                    <Link to="/profile/edit">Edit Profile</Link>
+                  </Button>
+                ) : user && (
+                  <StartChatButton userId={profile.id} userName={profile.full_name} />
+                )}
+              </div>
             </div>
 
             {/* Trust & Intent Section */}
@@ -181,7 +212,7 @@ export default function Profile() {
                 {profile.bio ? (
                   <p className="text-muted-foreground whitespace-pre-wrap">{profile.bio}</p>
                 ) : (
-                  <p className="text-muted-foreground italic">No bio added yet. Tell others about yourself!</p>
+                  <p className="text-muted-foreground italic">No bio added yet.</p>
                 )}
               </CardContent>
             </Card>
@@ -201,21 +232,18 @@ export default function Profile() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-muted-foreground italic">No skills added yet. Add your skills to get better matches!</p>
+                  <p className="text-muted-foreground italic">No skills added yet.</p>
                 )}
               </CardContent>
             </Card>
 
             {/* Resume Section */}
-            <ResumeSection profile={profile} isOwnProfile={true} />
+            <ResumeSection profile={profile} isOwnProfile={false} />
 
             {/* Achievements Section */}
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
+              <CardHeader>
                 <CardTitle>Achievements</CardTitle>
-                <Button asChild variant="outline" size="sm">
-                  <Link to="/profile/edit">Manage</Link>
-                </Button>
               </CardHeader>
               <CardContent>
                 {achievementsLoading ? (
@@ -230,12 +258,7 @@ export default function Profile() {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground italic mb-4">No achievements added yet.</p>
-                    <Button asChild variant="outline" size="sm">
-                      <Link to="/profile/edit">Add your first achievement</Link>
-                    </Button>
-                  </div>
+                  <p className="text-muted-foreground italic">No achievements added yet.</p>
                 )}
               </CardContent>
             </Card>
