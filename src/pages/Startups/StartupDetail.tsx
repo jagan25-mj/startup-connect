@@ -23,6 +23,8 @@ import { FounderAIInsights } from '@/components/ai/FounderAIInsights';
 import { TalentAIInsights } from '@/components/ai/TalentAIInsights';
 import { StartupUpdatesTimeline } from '@/components/startup/StartupUpdatesTimeline';
 import { StartupUpdateForm } from '@/components/startup/StartupUpdateForm';
+import { TeamMembersSection } from '@/components/startup/TeamMembersSection';
+import { InterestedTalentList } from '@/components/startup/InterestedTalentList';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -280,50 +282,12 @@ export default function StartupDetail() {
               </Card>
             </div>
 
-            {/* Interested Users (Only visible to founder) */}
-            {isOwner && interests.length > 0 && (
-              <Card className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5" />
-                    Interested Talent ({interests.length})
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {interests.map((interest) => (
-                      <div key={interest.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted/70 transition-colors">
-                        <Link 
-                          to={`/profile/${interest.user?.id}`} 
-                          className="flex items-center gap-3 flex-1 min-w-0"
-                        >
-                          <Avatar className="h-10 w-10 border border-border hover:ring-2 hover:ring-primary/30 transition-all">
-                            <AvatarImage src={getAvatarUrl(interest.user?.avatar_url)} />
-                            <AvatarFallback>
-                              {interest.user ? getInitials(interest.user.full_name) : 'U'}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="min-w-0">
-                            <p className="font-medium truncate hover:text-primary transition-colors">{interest.user?.full_name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {formatDistanceToNow(new Date(interest.created_at), { addSuffix: true })}
-                            </p>
-                          </div>
-                        </Link>
-                        <div className="flex gap-2 ml-2">
-                          {interest.user && (
-                            <StartChatButton
-                              userId={interest.user.id}
-                              userName={interest.user.full_name}
-                              size="sm"
-                            />
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+            {/* Interested Users with Accept/Reject (Only visible to founder) */}
+            {isOwner && id && (
+              <InterestedTalentList
+                startupId={id}
+                interests={interests}
+              />
             )}
 
             {/* Progress Updates Section */}
@@ -399,6 +363,17 @@ export default function StartupDetail() {
                   )}
                 </CardContent>
               </Card>
+            )}
+
+            {/* Team Members Section */}
+            {id && startup.founder && (
+              <TeamMembersSection
+                startupId={id}
+                founderId={startup.founder.id}
+                founderName={startup.founder.full_name}
+                founderAvatarUrl={startup.founder.avatar_url}
+                isOwner={isOwner}
+              />
             )}
 
             {/* Express Interest Card */}

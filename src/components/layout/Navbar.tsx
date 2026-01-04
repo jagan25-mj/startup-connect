@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Rocket, User, LogOut, LayoutDashboard, Plus, Home } from 'lucide-react';
+import { Rocket, User, LogOut, LayoutDashboard, Plus, Home, Users } from 'lucide-react';
 
 
 import { motion, AnimatePresence } from 'framer-motion';
@@ -93,6 +93,20 @@ export function Navbar() {
               Explore Startups
             </Link>
           </motion.div>
+          {user && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.25 }}
+            >
+              <Link
+                to="/network"
+                className="text-sm font-medium text-muted-foreground transition-all duration-300 hover:text-foreground hover:scale-105"
+              >
+                Network
+              </Link>
+            </motion.div>
+          )}
           {user && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
