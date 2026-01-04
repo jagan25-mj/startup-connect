@@ -11,30 +11,37 @@ const envSchema = z.object({
 });
 
 /**
- * Validate and parse environment variables
- * Throws an error if validation fails
+ * Get environment variables with fallback for development
+ * Returns raw values without strict validation to avoid blocking app startup
  */
-function validateEnv() {
-  try {
-    return envSchema.parse({
-      VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
-      VITE_SUPABASE_PUBLISHABLE_KEY: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-      VITE_SUPABASE_PROJECT_ID: import.meta.env.VITE_SUPABASE_PROJECT_ID,
-    });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      const issues = error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join('\n');
-      throw new Error(`Environment variable validation failed:\n${issues}`);
-    }
-    throw error;
-  }
+function getEnvVars() {
+  return {
+    VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || '',
+    VITE_SUPABASE_PUBLISHABLE_KEY: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || '',
+    VITE_SUPABASE_PROJECT_ID: import.meta.env.VITE_SUPABASE_PROJECT_ID || '',
+  };
 }
 
 /**
- * Validated environment variables
- * Safe to use throughout the application
+ * Validate environment variables (for use in production checks)
+ * Returns validation result without throwing
  */
-export const env = validateEnv();
+export function validateEnv() {
+  const result = envSchema.safeParse(getEnvVars());
+  return {
+    success: result.success,
+    data: result.success ? result.data : null,
+    errors: !result.success
+      ? result.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`)
+      : [],
+  };
+}
+
+/**
+ * Environment variables for use throughout the application
+ * Uses direct access to avoid blocking on validation errors
+ */
+export const env = getEnvVars();
 
 /**
  * Type-safe environment variable access
