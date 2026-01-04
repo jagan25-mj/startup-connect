@@ -9,7 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Rocket, Loader2, ArrowLeft } from 'lucide-react';
+import { Loader2, ArrowLeft } from 'lucide-react';
+import collabhubLogo from '@/assets/collabhub-logo.png';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email'),
@@ -73,9 +74,7 @@ export default function Login() {
 
         <Card className="border-border/50 shadow-2xl">
           <CardHeader className="text-center pb-4">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl gradient-primary shadow-glow">
-              <Rocket className="h-7 w-7 text-primary-foreground" />
-            </div>
+            <img src={collabhubLogo} alt="CollabHub" className="h-14 w-14 rounded-xl shadow-glow" />
             <CardTitle className="text-2xl">Welcome back</CardTitle>
             <CardDescription>Sign in to your CollabHub account</CardDescription>
           </CardHeader>

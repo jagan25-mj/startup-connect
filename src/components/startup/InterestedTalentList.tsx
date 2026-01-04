@@ -13,7 +13,7 @@ import { StartChatButton } from '@/components/messages/StartChatButton';
 import { TrustScore } from '@/components/trust/TrustScore';
 import { Users, UserPlus, Check, X, Loader2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { notifyInterestAccepted, notifyTalentAddedToTeam } from '@/lib/emailNotifications';
+// Email notifications disabled for MVP - only in-app notifications active
 import {
   Dialog,
   DialogContent,
@@ -57,36 +57,8 @@ export function InterestedTalentList({ startupId, startupName, interests }: Inte
     if (!selectedTalent || !user) return;
     
     setAcceptingId(selectedTalent.id);
-    const result = await addTeamMember(selectedTalent.id, roleInTeam || undefined);
-    
-    // Send email notifications on success (non-blocking)
-    if (result.success) {
-      const { data: founderProfile } = await supabase
-        .from('profiles')
-        .select('full_name')
-        .eq('id', user.id)
-        .single();
-
-      if (founderProfile) {
-        // Notify talent their interest was accepted
-        notifyInterestAccepted(
-          selectedTalent.id,
-          selectedTalent.name,
-          startupName,
-          founderProfile.full_name,
-          startupId
-        ).catch(console.error);
-
-        // Also notify they've been added to the team
-        notifyTalentAddedToTeam(
-          selectedTalent.id,
-          selectedTalent.name,
-          startupName,
-          roleInTeam || null,
-          startupId
-        ).catch(console.error);
-      }
-    }
+    await addTeamMember(selectedTalent.id, roleInTeam || undefined);
+    // Note: Email notifications disabled for MVP - only in-app notifications active
     
     setAcceptingId(null);
     setShowRoleDialog(false);

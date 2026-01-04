@@ -12,10 +12,9 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Rocket, User, LogOut, LayoutDashboard, Plus, Home, Users } from 'lucide-react';
-
-
-import { motion, AnimatePresence } from 'framer-motion';
+import { User, LogOut, LayoutDashboard, Plus } from 'lucide-react';
+import { motion } from 'framer-motion';
+import collabhubLogo from '@/assets/collabhub-logo.png';
 
 function getAvatarUrl(avatarPath: string | null | undefined): string | undefined {
   if (!avatarPath) return undefined;
@@ -49,13 +48,13 @@ export function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/70 backdrop-blur-xl supports-[backdrop-filter]:bg-background/50 shadow-sm shadow-black/5">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-2 transition-all duration-300 hover:opacity-80 hover:scale-[1.02]">
-          <motion.div
-            className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80"
+          <motion.img
+            src={collabhubLogo}
+            alt="CollabHub"
+            className="h-9 w-9 rounded-lg"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-          >
-            <Rocket className="h-5 w-5 text-primary-foreground" />
-          </motion.div>
+          />
           <motion.span
             className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent"
             initial={{ opacity: 0, x: -10 }}
