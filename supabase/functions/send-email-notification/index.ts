@@ -2,6 +2,10 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
+// Use Resend's test domain for development, or your verified domain
+// For testing: onboarding@resend.dev works without domain verification
+const FROM_EMAIL = "CollabHub <onboarding@resend.dev>";
+
 interface ResendEmailRequest {
   from: string;
   to: string[];
@@ -10,6 +14,16 @@ interface ResendEmailRequest {
 }
 
 async function sendEmail(request: ResendEmailRequest) {
+  console.log("Attempting to send email via Resend:", {
+    to: request.to,
+    subject: request.subject,
+    from: request.from,
+  });
+
+  if (!RESEND_API_KEY) {
+    throw new Error("RESEND_API_KEY is not configured");
+  }
+
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -19,12 +33,14 @@ async function sendEmail(request: ResendEmailRequest) {
     body: JSON.stringify(request),
   });
   
+  const responseText = await response.text();
+  console.log("Resend API response:", response.status, responseText);
+  
   if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Resend API error: ${error}`);
+    throw new Error(`Resend API error (${response.status}): ${responseText}`);
   }
   
-  return response.json();
+  return JSON.parse(responseText);
 }
 
 
@@ -161,7 +177,7 @@ const handler = async (req: Request): Promise<Response> => {
     const html = generateEmailHtml(payload.template, payload.data);
 
     const emailResponse = await sendEmail({
-      from: "CollabHub <collabhub.tech@gmail.com>",
+      from: FROM_EMAIL,
       to: [payload.to],
       subject: payload.subject,
       html,
