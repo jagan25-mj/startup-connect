@@ -12,6 +12,7 @@ import { IntentBadges } from '@/components/trust/IntentBadges';
 import { AchievementCard } from '@/components/profile/AchievementCard';
 import { ResumeSection } from '@/components/profile/ResumeSection';
 import { StartChatButton } from '@/components/messages/StartChatButton';
+import { ConnectButton } from '@/components/connections/ConnectButton';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Calendar, Lightbulb, Users, Github, Linkedin, ArrowLeft, ExternalLink } from 'lucide-react';
@@ -199,7 +200,10 @@ export default function PublicProfile() {
                     <Link to="/profile/edit">Edit Profile</Link>
                   </Button>
                 ) : user && (
-                  <StartChatButton userId={profile.id} userName={profile.full_name} />
+                  <>
+                    <ConnectButton userId={profile.id} userName={profile.full_name} />
+                    <StartChatButton userId={profile.id} userName={profile.full_name} />
+                  </>
                 )}
               </div>
             </div>

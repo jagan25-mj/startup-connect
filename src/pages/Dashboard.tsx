@@ -7,6 +7,7 @@ import { RecommendedStartups } from '@/components/dashboard/RecommendedStartups'
 import { TopTalentMatches } from '@/components/dashboard/TopTalentMatches';
 import { StatsWidget } from '@/components/dashboard/StatsWidget';
 import { FounderAIInsights } from '@/components/ai/FounderAIInsights';
+import { MyTeams } from '@/components/dashboard/MyTeams';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -308,7 +309,10 @@ export default function Dashboard() {
             )}
             
             {profile?.role === 'talent' ? (
-              <RecommendedStartups />
+              <>
+                <MyTeams />
+                <RecommendedStartups />
+              </>
             ) : (
               <TopTalentMatches />
             )}

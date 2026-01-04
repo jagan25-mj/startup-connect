@@ -24,6 +24,7 @@ import Profile from "./pages/Profile/Profile";
 import PublicProfile from "./pages/Profile/PublicProfile";
 import EditProfile from "./pages/Profile/EditProfile";
 import Messages from "./pages/Messages/Messages";
+import Network from "./pages/Network";
 
 
 const queryClient = new QueryClient();
@@ -125,6 +126,16 @@ const AppContent = () => {
             <PageTransition>
               <ProtectedRoute>
                 <Messages />
+              </ProtectedRoute>
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/network"
+          element={
+            <PageTransition>
+              <ProtectedRoute>
+                <Network />
               </ProtectedRoute>
             </PageTransition>
           }

@@ -107,6 +107,28 @@ export interface Message {
   sender?: Profile;
 }
 
+export interface StartupTeamMember {
+  id: string;
+  startup_id: string;
+  user_id: string;
+  role_in_team: string | null;
+  joined_at: string;
+  user?: Profile;
+}
+
+export type ConnectionStatus = 'pending' | 'accepted' | 'rejected';
+
+export interface Connection {
+  id: string;
+  requester_id: string;
+  receiver_id: string;
+  status: ConnectionStatus;
+  created_at: string;
+  updated_at: string;
+  requester?: Profile;
+  receiver?: Profile;
+}
+
 
 export const STAGE_LABELS: Record<StartupStage, string> = {
   idea: 'Idea Stage',
