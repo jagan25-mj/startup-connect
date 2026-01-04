@@ -65,7 +65,7 @@ export default function Register() {
 
     toast({
       title: 'Account created!',
-      description: 'Welcome to LaunchPad. Let\'s get started!',
+      description: 'Welcome to CollabHub. Let\'s get started!',
     });
     navigate('/dashboard');
   };
@@ -89,7 +89,7 @@ export default function Register() {
               <Rocket className="h-7 w-7 text-primary-foreground" />
             </div>
             <CardTitle className="text-2xl">Create your account</CardTitle>
-            <CardDescription>Join the LaunchPad community today</CardDescription>
+            <CardDescription>Join the CollabHub community today</CardDescription>
           </CardHeader>
 
           <form onSubmit={handleSubmit(onSubmit)}>

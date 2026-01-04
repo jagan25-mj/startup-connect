@@ -281,22 +281,25 @@ export default function StartupDetail() {
                 <CardContent>
                   <div className="space-y-4">
                     {interests.map((interest) => (
-                      <div key={interest.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-10 w-10 border border-border">
+                      <div key={interest.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted/70 transition-colors">
+                        <Link 
+                          to={`/profile/${interest.user?.id}`} 
+                          className="flex items-center gap-3 flex-1 min-w-0"
+                        >
+                          <Avatar className="h-10 w-10 border border-border hover:ring-2 hover:ring-primary/30 transition-all">
                             <AvatarImage src={interest.user?.avatar_url || undefined} />
                             <AvatarFallback>
                               {interest.user ? getInitials(interest.user.full_name) : 'U'}
                             </AvatarFallback>
                           </Avatar>
-                          <div>
-                            <p className="font-medium">{interest.user?.full_name}</p>
+                          <div className="min-w-0">
+                            <p className="font-medium truncate hover:text-primary transition-colors">{interest.user?.full_name}</p>
                             <p className="text-sm text-muted-foreground">
                               {formatDistanceToNow(new Date(interest.created_at), { addSuffix: true })}
                             </p>
                           </div>
-                        </div>
-                        <div className="flex gap-2">
+                        </Link>
+                        <div className="flex gap-2 ml-2">
                           {interest.user && (
                             <StartChatButton
                               userId={interest.user.id}
@@ -322,20 +325,20 @@ export default function StartupDetail() {
                   <CardTitle>Founder</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center gap-4 mb-4">
-                    <Avatar className="h-14 w-14 border-2 border-primary/20">
+                  <Link to={`/profile/${startup.founder.id}`} className="flex items-center gap-4 mb-4 group">
+                    <Avatar className="h-14 w-14 border-2 border-primary/20 group-hover:ring-2 group-hover:ring-primary/30 transition-all">
                       <AvatarImage src={startup.founder.avatar_url || undefined} />
                       <AvatarFallback className="bg-primary/10 text-primary">
                         {getInitials(startup.founder.full_name)}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-semibold">{startup.founder.full_name}</p>
+                      <p className="font-semibold group-hover:text-primary transition-colors">{startup.founder.full_name}</p>
                       {startup.founder.bio && (
                         <p className="text-sm text-muted-foreground line-clamp-2">{startup.founder.bio}</p>
                       )}
                     </div>
-                  </div>
+                  </Link>
                   {user && !isOwner && (
                     <div className="space-y-3">
                       <div className="flex gap-2">

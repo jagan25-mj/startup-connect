@@ -105,7 +105,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
               <p className="text-sm text-muted-foreground pt-4">
                 If this problem persists, please{' '}
-                <a href="mailto:support@startup-connect.com" className="text-primary hover:underline">
+                <a href="mailto:support@collabhub.com" className="text-primary hover:underline">
                   contact support
                 </a>
                 .

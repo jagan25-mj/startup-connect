@@ -77,7 +77,7 @@ export default function Login() {
               <Rocket className="h-7 w-7 text-primary-foreground" />
             </div>
             <CardTitle className="text-2xl">Welcome back</CardTitle>
-            <CardDescription>Sign in to your LaunchPad account</CardDescription>
+            <CardDescription>Sign in to your CollabHub account</CardDescription>
           </CardHeader>
 
           <form onSubmit={handleSubmit(onSubmit)}>

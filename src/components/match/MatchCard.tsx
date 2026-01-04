@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { MatchScore } from './MatchScore';
 import { Match, Startup, Profile, STAGE_LABELS } from '@/types/database';
-import { Briefcase, MapPin } from 'lucide-react';
+import { Briefcase } from 'lucide-react';
 
 interface MatchCardProps {
   match: Match & {
@@ -54,41 +54,45 @@ export function MatchCard({ match, type }: MatchCardProps) {
 
   if (type === 'talent' && match.talent) {
     return (
-      <Card className="group hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
-        <CardContent className="p-4">
-          <div className="flex items-start gap-4">
-            <MatchScore score={match.score} size="sm" showLabel={false} />
-            <Avatar className="h-10 w-10 border-2 border-primary/20">
-              <AvatarImage src={match.talent.avatar_url || undefined} />
-              <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                {getInitials(match.talent.full_name)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <h4 className="font-semibold truncate">{match.talent.full_name}</h4>
-              {match.talent.bio && (
-                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                  {match.talent.bio}
-                </p>
-              )}
-              {match.talent.skills && match.talent.skills.length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {match.talent.skills.slice(0, 3).map((skill) => (
-                    <Badge key={skill} variant="secondary" className="text-[10px] px-1.5 py-0">
-                      {skill}
-                    </Badge>
-                  ))}
-                  {match.talent.skills.length > 3 && (
-                    <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                      +{match.talent.skills.length - 3}
-                    </Badge>
-                  )}
-                </div>
-              )}
+      <Link to={`/profile/${match.talent.id}`}>
+        <Card className="group hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 cursor-pointer">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-4">
+              <MatchScore score={match.score} size="sm" showLabel={false} />
+              <Avatar className="h-10 w-10 border-2 border-primary/20">
+                <AvatarImage src={match.talent.avatar_url || undefined} />
+                <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                  {getInitials(match.talent.full_name)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-semibold truncate group-hover:text-primary transition-colors">
+                  {match.talent.full_name}
+                </h4>
+                {match.talent.bio && (
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                    {match.talent.bio}
+                  </p>
+                )}
+                {match.talent.skills && match.talent.skills.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {match.talent.skills.slice(0, 3).map((skill) => (
+                      <Badge key={skill} variant="secondary" className="text-[10px] px-1.5 py-0">
+                        {skill}
+                      </Badge>
+                    ))}
+                    {match.talent.skills.length > 3 && (
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                        +{match.talent.skills.length - 3}
+                      </Badge>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </Link>
     );
   }
 

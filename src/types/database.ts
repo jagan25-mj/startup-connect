@@ -2,6 +2,8 @@ export type UserRole = 'founder' | 'talent';
 
 export type StartupStage = 'idea' | 'mvp' | 'early_stage' | 'growth' | 'scaling';
 
+export type AchievementType = 'hackathon' | 'internship' | 'project' | 'certification' | 'award';
+
 export interface Profile {
   id: string;
   full_name: string;
@@ -10,6 +12,23 @@ export interface Profile {
   skills: string[];
   avatar_url: string | null;
   created_at: string;
+  resume_url?: string | null;
+  resume_filename?: string | null;
+  resume_uploaded_at?: string | null;
+  github_url?: string | null;
+  linkedin_url?: string | null;
+}
+
+export interface ProfileAchievement {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string | null;
+  achievement_type: AchievementType;
+  year: number | null;
+  proof_link: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Startup {
@@ -90,6 +109,14 @@ export const STAGE_COLORS: Record<StartupStage, string> = {
   early_stage: 'bg-accent/10 text-accent',
   growth: 'bg-success/10 text-success',
   scaling: 'bg-warning/10 text-warning',
+};
+
+export const ACHIEVEMENT_TYPE_LABELS: Record<AchievementType, string> = {
+  hackathon: 'Hackathon',
+  internship: 'Internship',
+  project: 'Project',
+  certification: 'Certification',
+  award: 'Award',
 };
 
 export const INDUSTRIES = [
