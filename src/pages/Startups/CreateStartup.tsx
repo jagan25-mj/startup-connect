@@ -60,8 +60,7 @@ export default function CreateStartup() {
         industry: data.industry,
         stage: data.stage,
         founder_id: user.id,
-        required_skills: requiredSkills,
-      } as any)
+      })
       .select()
       .single();
 
