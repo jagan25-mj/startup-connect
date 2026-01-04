@@ -60,6 +60,7 @@ export interface StartupUpdate {
   title: string;
   description: string | null;
   tag: UpdateTag | null;
+  media_url: string | null;
   created_at: string;
   startup?: Startup;
 }

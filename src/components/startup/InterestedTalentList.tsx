@@ -13,7 +13,7 @@ import { StartChatButton } from '@/components/messages/StartChatButton';
 import { TrustScore } from '@/components/trust/TrustScore';
 import { Users, UserPlus, Check, X, Loader2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { notifyInterestAccepted } from '@/lib/emailNotifications';
+import { notifyInterestAccepted, notifyTalentAddedToTeam } from '@/lib/emailNotifications';
 import {
   Dialog,
   DialogContent,
@@ -59,7 +59,7 @@ export function InterestedTalentList({ startupId, startupName, interests }: Inte
     setAcceptingId(selectedTalent.id);
     const result = await addTeamMember(selectedTalent.id, roleInTeam || undefined);
     
-    // Send email notification on success (non-blocking)
+    // Send email notifications on success (non-blocking)
     if (result.success) {
       const { data: founderProfile } = await supabase
         .from('profiles')
@@ -68,11 +68,21 @@ export function InterestedTalentList({ startupId, startupName, interests }: Inte
         .single();
 
       if (founderProfile) {
+        // Notify talent their interest was accepted
         notifyInterestAccepted(
           selectedTalent.id,
           selectedTalent.name,
           startupName,
           founderProfile.full_name,
+          startupId
+        ).catch(console.error);
+
+        // Also notify they've been added to the team
+        notifyTalentAddedToTeam(
+          selectedTalent.id,
+          selectedTalent.name,
+          startupName,
+          roleInTeam || null,
           startupId
         ).catch(console.error);
       }

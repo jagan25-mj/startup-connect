@@ -17,6 +17,7 @@ interface ActivityItem {
   description: string;
   startup: Startup & { founder?: Profile };
   tag?: UpdateTag | null;
+  media_url?: string | null;
   created_at: string;
 }
 
@@ -102,6 +103,7 @@ export function ActivityFeed() {
               description: update.description?.slice(0, 100) + (update.description?.length > 100 ? '...' : '') || '',
               startup: update.startup as Startup & { founder?: Profile },
               tag: update.tag as UpdateTag | null,
+              media_url: update.media_url as string | null,
               created_at: update.created_at,
             });
           }
@@ -202,6 +204,34 @@ export function ActivityFeed() {
                 <p className="text-sm text-muted-foreground line-clamp-1 mt-0.5">
                   {activity.description}
                 </p>
+              )}
+
+              {/* Media Preview Thumbnail */}
+              {activity.media_url && (
+                <div className="mt-2 rounded-md overflow-hidden border border-border w-fit max-w-[200px]">
+                  {activity.media_url.match(/\.(mp4|webm|mov)$/i) ? (
+                    <div className="relative">
+                      <video
+                        src={activity.media_url}
+                        className="w-full h-20 object-cover bg-muted"
+                        muted
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                        <div className="p-1.5 rounded-full bg-white/90">
+                          <svg className="w-3 h-3 text-foreground" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/>
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <img
+                      src={activity.media_url}
+                      alt=""
+                      className="w-full h-20 object-cover"
+                    />
+                  )}
+                </div>
               )}
 
               <div className="flex items-center gap-2 mt-1">
