@@ -17,14 +17,16 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, Send, X } from 'lucide-react';
 import type { UpdateTag } from '@/types/database';
 import { UPDATE_TAG_LABELS } from '@/types/database';
+import { notifyStartupUpdate } from '@/lib/emailNotifications';
 
 interface StartupUpdateFormProps {
   startupId: string;
+  startupName: string;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
 
-export function StartupUpdateForm({ startupId, onSuccess, onCancel }: StartupUpdateFormProps) {
+export function StartupUpdateForm({ startupId, startupName, onSuccess, onCancel }: StartupUpdateFormProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [tag, setTag] = useState<UpdateTag | ''>('');
@@ -43,6 +45,27 @@ export function StartupUpdateForm({ startupId, onSuccess, onCancel }: StartupUpd
         });
 
       if (error) throw error;
+      
+      // Get interested talents and team members to notify
+      const [interestsResult, teamResult] = await Promise.all([
+        supabase.from('startup_interests').select('user_id').eq('startup_id', startupId),
+        supabase.from('startup_team_members').select('user_id').eq('startup_id', startupId),
+      ]);
+
+      const interestedIds = interestsResult.data?.map(i => i.user_id) || [];
+      const teamIds = teamResult.data?.map(t => t.user_id) || [];
+      const recipientIds = [...new Set([...interestedIds, ...teamIds])];
+
+      // Send email notifications in background
+      if (recipientIds.length > 0) {
+        notifyStartupUpdate(
+          recipientIds,
+          startupName,
+          title,
+          description || null,
+          startupId
+        );
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['startup-updates', startupId] });

@@ -7,11 +7,13 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { StartupInterest, Profile } from '@/types/database';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
+import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { StartChatButton } from '@/components/messages/StartChatButton';
 import { TrustScore } from '@/components/trust/TrustScore';
 import { Users, UserPlus, Check, X, Loader2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { notifyInterestAccepted } from '@/lib/emailNotifications';
 import {
   Dialog,
   DialogContent,
@@ -34,10 +36,12 @@ function getInitials(name: string) {
 
 interface InterestedTalentListProps {
   startupId: string;
+  startupName: string;
   interests: StartupInterest[];
 }
 
-export function InterestedTalentList({ startupId, interests }: InterestedTalentListProps) {
+export function InterestedTalentList({ startupId, startupName, interests }: InterestedTalentListProps) {
+  const { user } = useAuth();
   const { addTeamMember, isTeamMember } = useTeamMembers(startupId);
   const [acceptingId, setAcceptingId] = useState<string | null>(null);
   const [showRoleDialog, setShowRoleDialog] = useState(false);
@@ -50,10 +54,30 @@ export function InterestedTalentList({ startupId, interests }: InterestedTalentL
   };
 
   const confirmAccept = async () => {
-    if (!selectedTalent) return;
+    if (!selectedTalent || !user) return;
     
     setAcceptingId(selectedTalent.id);
-    await addTeamMember(selectedTalent.id, roleInTeam || undefined);
+    const result = await addTeamMember(selectedTalent.id, roleInTeam || undefined);
+    
+    // Send email notification on success (non-blocking)
+    if (result.success) {
+      const { data: founderProfile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .single();
+
+      if (founderProfile) {
+        notifyInterestAccepted(
+          selectedTalent.id,
+          selectedTalent.name,
+          startupName,
+          founderProfile.full_name,
+          startupId
+        ).catch(console.error);
+      }
+    }
+    
     setAcceptingId(null);
     setShowRoleDialog(false);
     setSelectedTalent(null);
