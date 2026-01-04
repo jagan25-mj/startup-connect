@@ -8,9 +8,18 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
+import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow, format, isToday, isYesterday } from 'date-fns';
 import { ArrowLeft, Send, MessageSquare, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+function getAvatarUrl(avatarPath: string | null | undefined): string | undefined {
+  if (!avatarPath) return undefined;
+  if (avatarPath.startsWith('http')) return avatarPath;
+  
+  const { data } = supabase.storage.from('avatars').getPublicUrl(avatarPath);
+  return data.publicUrl;
+}
 
 export default function Messages() {
   const { conversationId } = useParams();
@@ -132,7 +141,7 @@ export default function Messages() {
                     )}
                   >
                     <Avatar className="h-12 w-12 border-2 border-primary/20">
-                      <AvatarImage src={conv.other_participant?.avatar_url || undefined} />
+                      <AvatarImage src={getAvatarUrl(conv.other_participant?.avatar_url)} />
                       <AvatarFallback className="bg-primary/10 text-primary">
                         {conv.other_participant?.full_name
                           ? getInitials(conv.other_participant.full_name)
@@ -189,7 +198,7 @@ export default function Messages() {
                   <Link to={`/profile/${currentConversation.other_participant?.id}`}>
                     <Avatar className="h-10 w-10 border-2 border-primary/20 hover:ring-2 hover:ring-primary/30 transition-all cursor-pointer">
                       <AvatarImage
-                        src={currentConversation.other_participant?.avatar_url || undefined}
+                        src={getAvatarUrl(currentConversation.other_participant?.avatar_url)}
                       />
                       <AvatarFallback className="bg-primary/10 text-primary">
                         {currentConversation.other_participant?.full_name
@@ -230,7 +239,7 @@ export default function Messages() {
                         >
                           {!isOwn && showAvatar && (
                             <Avatar className="h-8 w-8 border border-border">
-                              <AvatarImage src={message.sender?.avatar_url || undefined} />
+                              <AvatarImage src={getAvatarUrl(message.sender?.avatar_url)} />
                               <AvatarFallback className="text-xs bg-muted">
                                 {message.sender?.full_name
                                   ? getInitials(message.sender.full_name)

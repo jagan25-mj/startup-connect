@@ -17,6 +17,14 @@ import { ResumeSection } from '@/components/profile/ResumeSection';
 import { AchievementCard } from '@/components/profile/AchievementCard';
 import type { ProfileAchievement } from '@/types/database';
 
+function getAvatarUrl(avatarPath: string | null | undefined): string | undefined {
+  if (!avatarPath) return undefined;
+  if (avatarPath.startsWith('http')) return avatarPath;
+  
+  const { data } = supabase.storage.from('avatars').getPublicUrl(avatarPath);
+  return data.publicUrl;
+}
+
 export default function Profile() {
   const { profile, profileLoading, user } = useAuth();
 
@@ -99,7 +107,7 @@ export default function Profile() {
           <CardContent className="relative pt-0 -mt-16">
             <div className="flex flex-col sm:flex-row sm:items-end gap-4 mb-6">
               <Avatar className="h-32 w-32 border-4 border-background shadow-lg">
-                <AvatarImage src={profile.avatar_url || undefined} />
+                <AvatarImage src={getAvatarUrl(profile.avatar_url)} />
                 <AvatarFallback className="bg-primary/10 text-primary text-3xl font-bold">
                   {getInitials(profile.full_name)}
                 </AvatarFallback>

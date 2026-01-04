@@ -9,11 +9,20 @@ import { formatDistanceToNow } from 'date-fns';
 import { MatchScoreBreakdown } from '@/components/match/MatchScoreBreakdown';
 import { TalentAIInsights } from '@/components/ai/TalentAIInsights';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 interface StartupCardProps {
   startup: Startup;
   interestCount?: number;
   matchScore?: number;
+}
+
+function getAvatarUrl(avatarPath: string | null | undefined): string | undefined {
+  if (!avatarPath) return undefined;
+  if (avatarPath.startsWith('http')) return avatarPath;
+  
+  const { data } = supabase.storage.from('avatars').getPublicUrl(avatarPath);
+  return data.publicUrl;
 }
 
 export function StartupCard({ startup, interestCount, matchScore }: StartupCardProps) {
@@ -85,7 +94,7 @@ export function StartupCard({ startup, interestCount, matchScore }: StartupCardP
                 {startup.founder && (
                   <>
                     <Avatar className="h-7 w-7 border border-border">
-                      <AvatarImage src={startup.founder.avatar_url || undefined} />
+                      <AvatarImage src={getAvatarUrl(startup.founder.avatar_url)} />
                       <AvatarFallback className="text-xs bg-muted">
                         {getInitials(startup.founder.full_name)}
                       </AvatarFallback>

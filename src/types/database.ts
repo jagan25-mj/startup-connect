@@ -4,6 +4,8 @@ export type StartupStage = 'idea' | 'mvp' | 'early_stage' | 'growth' | 'scaling'
 
 export type AchievementType = 'hackathon' | 'internship' | 'project' | 'certification' | 'award';
 
+export type UpdateTag = 'milestone' | 'update' | 'looking_for_talent';
+
 export interface Profile {
   id: string;
   full_name: string;
@@ -40,6 +42,7 @@ export interface Startup {
   founder_id: string;
   created_at: string;
   founder?: Profile;
+  interest_count?: number;
 }
 
 export interface StartupInterest {
@@ -48,6 +51,16 @@ export interface StartupInterest {
   user_id: string;
   created_at: string;
   user?: Profile;
+  startup?: Startup;
+}
+
+export interface StartupUpdate {
+  id: string;
+  startup_id: string;
+  title: string;
+  description: string | null;
+  tag: UpdateTag | null;
+  created_at: string;
   startup?: Startup;
 }
 
@@ -109,6 +122,18 @@ export const STAGE_COLORS: Record<StartupStage, string> = {
   early_stage: 'bg-accent/10 text-accent',
   growth: 'bg-success/10 text-success',
   scaling: 'bg-warning/10 text-warning',
+};
+
+export const UPDATE_TAG_LABELS: Record<UpdateTag, string> = {
+  milestone: 'Milestone',
+  update: 'Update',
+  looking_for_talent: 'Looking for Talent',
+};
+
+export const UPDATE_TAG_COLORS: Record<UpdateTag, string> = {
+  milestone: 'bg-success/10 text-success border-success/20',
+  update: 'bg-primary/10 text-primary border-primary/20',
+  looking_for_talent: 'bg-accent/10 text-accent border-accent/20',
 };
 
 export const ACHIEVEMENT_TYPE_LABELS: Record<AchievementType, string> = {

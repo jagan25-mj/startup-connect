@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { StartChatButton } from '@/components/messages/StartChatButton';
 import {
   Loader2, ArrowLeft, Building2, Calendar, Edit, Trash2,
-  Heart, HeartOff, Users
+  Heart, HeartOff, Users, Plus
 } from 'lucide-react';
 import { formatDistanceToNow, format } from 'date-fns';
 import { TeamHealth, FillsSkillGapBadge } from '@/components/startup/TeamHealth';
@@ -21,6 +21,8 @@ import { EndorseButton } from '@/components/trust/EndorseButton';
 import { ReportButton } from '@/components/trust/ReportButton';
 import { FounderAIInsights } from '@/components/ai/FounderAIInsights';
 import { TalentAIInsights } from '@/components/ai/TalentAIInsights';
+import { StartupUpdatesTimeline } from '@/components/startup/StartupUpdatesTimeline';
+import { StartupUpdateForm } from '@/components/startup/StartupUpdateForm';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +35,14 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 
+function getAvatarUrl(avatarPath: string | null | undefined): string | undefined {
+  if (!avatarPath) return undefined;
+  if (avatarPath.startsWith('http')) return avatarPath;
+  
+  const { data } = supabase.storage.from('avatars').getPublicUrl(avatarPath);
+  return data.publicUrl;
+}
+
 export default function StartupDetail() {
   const { id } = useParams<{ id: string }>();
   const [startup, setStartup] = useState<Startup | null>(null);
@@ -40,6 +50,7 @@ export default function StartupDetail() {
   const [hasExpressedInterest, setHasExpressedInterest] = useState(false);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [showUpdateForm, setShowUpdateForm] = useState(false);
   const { user, profile } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -287,7 +298,7 @@ export default function StartupDetail() {
                           className="flex items-center gap-3 flex-1 min-w-0"
                         >
                           <Avatar className="h-10 w-10 border border-border hover:ring-2 hover:ring-primary/30 transition-all">
-                            <AvatarImage src={interest.user?.avatar_url || undefined} />
+                            <AvatarImage src={getAvatarUrl(interest.user?.avatar_url)} />
                             <AvatarFallback>
                               {interest.user ? getInitials(interest.user.full_name) : 'U'}
                             </AvatarFallback>
@@ -314,6 +325,29 @@ export default function StartupDetail() {
                 </CardContent>
               </Card>
             )}
+
+            {/* Progress Updates Section */}
+            <div className="space-y-4">
+              {isOwner && (
+                showUpdateForm ? (
+                  <StartupUpdateForm
+                    startupId={startup.id}
+                    onSuccess={() => setShowUpdateForm(false)}
+                    onCancel={() => setShowUpdateForm(false)}
+                  />
+                ) : (
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => setShowUpdateForm(true)}
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Post Progress Update
+                  </Button>
+                )
+              )}
+              <StartupUpdatesTimeline startupId={startup.id} />
+            </div>
           </div>
 
           {/* Sidebar */}
@@ -327,7 +361,7 @@ export default function StartupDetail() {
                 <CardContent>
                   <Link to={`/profile/${startup.founder.id}`} className="flex items-center gap-4 mb-4 group">
                     <Avatar className="h-14 w-14 border-2 border-primary/20 group-hover:ring-2 group-hover:ring-primary/30 transition-all">
-                      <AvatarImage src={startup.founder.avatar_url || undefined} />
+                      <AvatarImage src={getAvatarUrl(startup.founder.avatar_url)} />
                       <AvatarFallback className="bg-primary/10 text-primary">
                         {getInitials(startup.founder.full_name)}
                       </AvatarFallback>

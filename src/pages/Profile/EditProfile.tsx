@@ -18,6 +18,7 @@ import { Loader2, ArrowLeft, User, X, Upload, FileText, Trash2, Plus, Github, Li
 import { Skeleton } from '@/components/ui/skeleton';
 import { AchievementCard } from '@/components/profile/AchievementCard';
 import { AchievementForm } from '@/components/profile/AchievementForm';
+import { AvatarUpload } from '@/components/profile/AvatarUpload';
 import type { ProfileAchievement } from '@/types/database';
 
 const profileSchema = z.object({
@@ -309,15 +310,22 @@ export default function EditProfile() {
         {/* Basic Info Card */}
         <Card className="animate-fade-in mb-6">
           <CardHeader className="text-center pb-2">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10">
-              <User className="h-7 w-7 text-primary" />
-            </div>
             <CardTitle className="text-2xl">Edit Profile</CardTitle>
             <CardDescription>Update your personal information</CardDescription>
           </CardHeader>
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <CardContent className="space-y-6 pt-6">
+              {/* Avatar Upload Section */}
+              <div className="flex justify-center pb-4 border-b border-border">
+                <AvatarUpload
+                  userId={user.id}
+                  currentAvatarUrl={profile.avatar_url}
+                  fullName={profile.full_name}
+                  onUploadComplete={() => refreshProfile()}
+                />
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="full_name">Full Name</Label>
                 <Input
@@ -328,19 +336,6 @@ export default function EditProfile() {
                 />
                 {errors.full_name && (
                   <p className="text-sm text-destructive">{errors.full_name.message}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="avatar_url">Avatar URL</Label>
-                <Input
-                  id="avatar_url"
-                  placeholder="https://example.com/avatar.jpg"
-                  {...register('avatar_url')}
-                  className={errors.avatar_url ? 'border-destructive' : ''}
-                />
-                {errors.avatar_url && (
-                  <p className="text-sm text-destructive">{errors.avatar_url.message}</p>
                 )}
               </div>
 
