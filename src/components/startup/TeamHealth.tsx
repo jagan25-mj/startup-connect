@@ -64,10 +64,15 @@ export function TeamHealth({ startup, interestedTalentSkills = [], compact = fal
     return (
         <Card className="animate-slide-up">
             <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                    <Users className="h-5 w-5 text-primary" />
-                    Team Health
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                        <Users className="h-5 w-5 text-primary" />
+                        Team Health
+                    </CardTitle>
+                    <Badge variant="outline" className="text-[10px] px-2 bg-muted/50 border-border/50">
+                        AI-Assisted
+                    </Badge>
+                </div>
             </CardHeader>
             <CardContent className="space-y-4">
                 {/* Progress Bar */}
@@ -107,6 +112,7 @@ export function TeamHealth({ startup, interestedTalentSkills = [], compact = fal
                         <div className="flex items-center gap-2 text-sm font-medium">
                             <AlertCircle className="h-4 w-4 text-amber-500" />
                             Skills to Consider
+                            <span className="text-xs text-muted-foreground font-normal">(suggestions)</span>
                         </div>
                         <div className="flex flex-wrap gap-1.5">
                             {analysis.missingSkills.map((skill) => (
@@ -153,7 +159,7 @@ export function TeamHealth({ startup, interestedTalentSkills = [], compact = fal
                     <div className="space-y-2 pt-2 border-t">
                         <div className="flex items-center gap-2 text-sm font-medium">
                             <TrendingUp className="h-4 w-4 text-primary" />
-                            Consider Hiring
+                            You Might Consider Hiring
                         </div>
                         <div className="flex flex-wrap gap-1.5">
                             {analysis.suggestedRoles.slice(0, 4).map((role) => (

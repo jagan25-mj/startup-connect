@@ -6,6 +6,7 @@ import { StartupCard } from '@/components/startup/StartupCard';
 import { RecommendedStartups } from '@/components/dashboard/RecommendedStartups';
 import { TopTalentMatches } from '@/components/dashboard/TopTalentMatches';
 import { StatsWidget } from '@/components/dashboard/StatsWidget';
+import { FounderAIInsights } from '@/components/ai/FounderAIInsights';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -297,6 +298,15 @@ export default function Dashboard() {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Founder AI Insights Card */}
+            {profile?.role === 'founder' && myStartups[0] && (
+              <FounderAIInsights
+                startup={myStartups[0]}
+                interestCount={totalInterests}
+                variant="card"
+              />
+            )}
+            
             {profile?.role === 'talent' ? (
               <RecommendedStartups />
             ) : (

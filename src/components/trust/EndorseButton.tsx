@@ -74,7 +74,6 @@ export function EndorseButton({ userId, userName = 'this user', onEndorsementCha
                     .insert({
                         endorser_id: user.id,
                         endorsed_id: userId,
-                        type: 'skill'
                     });
 
                 if (error) {
