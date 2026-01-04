@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatDistanceToNow } from 'date-fns';
-import { Clock, TrendingUp, Target, Users } from 'lucide-react';
+import { Clock, TrendingUp, Target, Users, Play } from 'lucide-react';
 import type { StartupUpdate, UpdateTag } from '@/types/database';
 import { UPDATE_TAG_LABELS, UPDATE_TAG_COLORS } from '@/types/database';
 
@@ -130,6 +130,25 @@ export function StartupUpdatesTimeline({ startupId }: StartupUpdatesTimelineProp
                     <p className="text-sm text-muted-foreground mb-2 whitespace-pre-wrap">
                       {update.description}
                     </p>
+                  )}
+
+                  {/* Media Display */}
+                  {update.media_url && (
+                    <div className="my-3 rounded-lg overflow-hidden border border-border">
+                      {update.media_url.match(/\.(mp4|webm|mov)$/i) ? (
+                        <video
+                          src={update.media_url}
+                          controls
+                          className="w-full max-h-64 object-contain bg-muted"
+                        />
+                      ) : (
+                        <img
+                          src={update.media_url}
+                          alt={update.title}
+                          className="w-full max-h-64 object-contain bg-muted"
+                        />
+                      )}
+                    </div>
                   )}
 
                   <p className="text-xs text-muted-foreground">
