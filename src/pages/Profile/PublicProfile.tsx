@@ -18,6 +18,14 @@ import { Calendar, Lightbulb, Users, Github, Linkedin, ArrowLeft, ExternalLink }
 import { format } from 'date-fns';
 import type { Profile, ProfileAchievement } from '@/types/database';
 
+function getAvatarUrl(avatarPath: string | null | undefined): string | undefined {
+  if (!avatarPath) return undefined;
+  if (avatarPath.startsWith('http')) return avatarPath;
+  
+  const { data } = supabase.storage.from('avatars').getPublicUrl(avatarPath);
+  return data.publicUrl;
+}
+
 export default function PublicProfile() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
@@ -126,7 +134,7 @@ export default function PublicProfile() {
           <CardContent className="relative pt-0 -mt-16">
             <div className="flex flex-col sm:flex-row sm:items-end gap-4 mb-6">
               <Avatar className="h-32 w-32 border-4 border-background shadow-lg">
-                <AvatarImage src={profile.avatar_url || undefined} />
+                <AvatarImage src={getAvatarUrl(profile.avatar_url)} />
                 <AvatarFallback className="bg-primary/10 text-primary text-3xl font-bold">
                   {getInitials(profile.full_name)}
                 </AvatarFallback>

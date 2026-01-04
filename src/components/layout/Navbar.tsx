@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { MessagesBadge } from '@/components/messages/MessagesBadge';
+import { supabase } from '@/integrations/supabase/client';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,10 +12,18 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Rocket, User, LogOut, LayoutDashboard, Plus } from 'lucide-react';
+import { Rocket, User, LogOut, LayoutDashboard, Plus, Home } from 'lucide-react';
 
 
 import { motion, AnimatePresence } from 'framer-motion';
+
+function getAvatarUrl(avatarPath: string | null | undefined): string | undefined {
+  if (!avatarPath) return undefined;
+  if (avatarPath.startsWith('http')) return avatarPath;
+  
+  const { data } = supabase.storage.from('avatars').getPublicUrl(avatarPath);
+  return data.publicUrl;
+}
 
 export function Navbar() {
   const { user, profile, signOut } = useAuth();
@@ -33,6 +42,8 @@ export function Navbar() {
       .toUpperCase()
       .slice(0, 2);
   };
+
+  const avatarUrl = getAvatarUrl(profile?.avatar_url);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/70 backdrop-blur-xl supports-[backdrop-filter]:bg-background/50 shadow-sm shadow-black/5">
@@ -56,6 +67,20 @@ export function Navbar() {
         </Link>
 
         <div className="hidden items-center gap-6 md:flex">
+          {user && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.15 }}
+            >
+              <Link
+                to="/home"
+                className="text-sm font-medium text-muted-foreground transition-all duration-300 hover:text-foreground hover:scale-105"
+              >
+                Home
+              </Link>
+            </motion.div>
+          )}
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -115,7 +140,7 @@ export function Navbar() {
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 overflow-hidden transition-transform duration-300">
                       <Avatar className="h-10 w-10 border-2 border-primary/20">
-                        <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name} />
+                        <AvatarImage src={avatarUrl} alt={profile?.full_name} />
                         <AvatarFallback className="bg-primary/10 text-primary font-medium">
                           {profile?.full_name ? getInitials(profile.full_name) : 'U'}
                         </AvatarFallback>
@@ -126,7 +151,7 @@ export function Navbar() {
                 <DropdownMenuContent align="end" className="w-56">
                   <div className="flex items-center justify-start gap-3 p-3">
                     <Avatar className="h-10 w-10 border-2 border-primary/20">
-                      <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name} />
+                      <AvatarImage src={avatarUrl} alt={profile?.full_name} />
                       <AvatarFallback className="bg-primary/10 text-primary font-medium">
                         {profile?.full_name ? getInitials(profile.full_name) : 'U'}
                       </AvatarFallback>

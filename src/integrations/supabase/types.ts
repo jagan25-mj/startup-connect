@@ -339,6 +339,41 @@ export type Database = {
           },
         ]
       }
+      startup_updates: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          startup_id: string
+          tag: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          startup_id: string
+          tag?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          startup_id?: string
+          tag?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "startup_updates_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       startups: {
         Row: {
           created_at: string

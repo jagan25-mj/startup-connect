@@ -11,6 +11,7 @@ import { PageTransition } from './components/layout/PageTransition';
 
 
 import Index from "./pages/Index";
+import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
@@ -34,6 +35,16 @@ const AppContent = () => {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<PageTransition><Index /></PageTransition>} />
+        <Route
+          path="/home"
+          element={
+            <PageTransition>
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            </PageTransition>
+          }
+        />
         <Route path="/auth/login" element={<PageTransition><Login /></PageTransition>} />
         <Route path="/auth/register" element={<PageTransition><Register /></PageTransition>} />
         <Route path="/startups" element={<PageTransition><StartupsList /></PageTransition>} />
