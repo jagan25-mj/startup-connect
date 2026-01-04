@@ -3,10 +3,12 @@ import { motion } from 'framer-motion';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Startup, STAGE_LABELS, STAGE_COLORS } from '@/types/database';
-import { Building2, Calendar, ArrowRight, Sparkles } from 'lucide-react';
+import { Startup, Profile, STAGE_LABELS, STAGE_COLORS } from '@/types/database';
+import { Building2, Calendar, ArrowRight } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { MatchScoreBreakdown } from '@/components/match/MatchScoreBreakdown';
+import { TalentAIInsights } from '@/components/ai/TalentAIInsights';
+import { useAuth } from '@/hooks/useAuth';
 
 interface StartupCardProps {
   startup: Startup;
@@ -15,6 +17,8 @@ interface StartupCardProps {
 }
 
 export function StartupCard({ startup, interestCount, matchScore }: StartupCardProps) {
+  const { profile } = useAuth();
+  
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -55,6 +59,15 @@ export function StartupCard({ startup, interestCount, matchScore }: StartupCardP
                 </Badge>
                 {matchScore !== undefined && matchScore > 0 && (
                   <MatchScoreBreakdown score={matchScore} />
+                )}
+                {/* AI Fit Badge for Talent */}
+                {profile?.role === 'talent' && (
+                  <TalentAIInsights
+                    talent={profile}
+                    startup={startup}
+                    matchScore={matchScore}
+                    variant="badge"
+                  />
                 )}
               </div>
             </div>

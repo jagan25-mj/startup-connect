@@ -53,10 +53,15 @@ export function RecommendedStartups() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Sparkles className="h-5 w-5 text-primary" />
-          Recommended for You
-        </CardTitle>
+        <div>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Sparkles className="h-5 w-5 text-primary" />
+            Recommended for You
+          </CardTitle>
+          <p className="text-xs text-muted-foreground mt-1">
+            AI-assisted suggestions based on your skills
+          </p>
+        </div>
         <Button asChild variant="ghost" size="sm">
           <Link to="/startups">
             View All

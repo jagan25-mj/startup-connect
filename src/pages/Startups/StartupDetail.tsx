@@ -19,6 +19,8 @@ import { TeamHealth, FillsSkillGapBadge } from '@/components/startup/TeamHealth'
 import { talentFillsSkillGap } from '@/lib/skillGap';
 import { EndorseButton } from '@/components/trust/EndorseButton';
 import { ReportButton } from '@/components/trust/ReportButton';
+import { FounderAIInsights } from '@/components/ai/FounderAIInsights';
+import { TalentAIInsights } from '@/components/ai/TalentAIInsights';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -404,6 +406,25 @@ export default function StartupDetail() {
               <TeamHealth
                 startup={startup}
                 interestedTalentSkills={interests.flatMap(i => i.user?.skills || [])}
+              />
+            )}
+
+            {/* Founder AI Insights - Only visible to owner */}
+            {isOwner && startup && (
+              <FounderAIInsights
+                startup={startup}
+                interestedTalentSkills={interests.flatMap(i => i.user?.skills || [])}
+                interestCount={interests.length}
+                variant="compact"
+              />
+            )}
+
+            {/* Talent AI Insights - Only visible to non-owner talent */}
+            {user && !isOwner && profile?.role === 'talent' && startup && (
+              <TalentAIInsights
+                talent={profile}
+                startup={startup}
+                variant="compact"
               />
             )}
 
