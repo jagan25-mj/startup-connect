@@ -1,73 +1,153 @@
-# Welcome to your Lovable project
+# CollabHub
 
-## Project info
+**AI-Assisted Startup Collaboration Platform**
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+Connect founders with talent through intelligent skill-based matching, real-time collaboration, and trust-verified networking.
 
-## How can I edit this code?
+[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://startup-connect-one.vercel.app)
 
-There are several ways of editing your application.
+---
 
-**Use Lovable**
+## ✨ Features
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+### For Founders
+- **Create & Manage Startups** — Post your startup with stage, industry, and skill requirements
+- **AI-Assisted Talent Matching** — Find talent whose skills match your startup needs
+- **Team Formation** — Accept interested talent and build your team
+- **Progress Updates** — Post milestones and updates for your team and followers
 
-Changes made via Lovable will be committed automatically to this repo.
+### For Talent
+- **Discover Startups** — Browse and filter startups by stage, industry, and skills
+- **Express Interest** — Show interest in startups that match your goals
+- **Skill Gap Analysis** — See how your skills align with startup needs
+- **Team Membership** — Join startup teams and collaborate
 
-**Use your preferred IDE**
+### Platform Features
+- **Real-time Messaging** — 1:1 conversations with read receipts
+- **Network & Connections** — Build your professional network
+- **Trust System** — Endorsements, trust scores, and user reporting
+- **AI Insights** — Personalized suggestions (framed as AI-assisted, not automated)
+- **Activity Feed** — Stay updated on startup progress
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+---
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🛠️ Tech Stack
 
-Follow these steps:
+| Layer | Technology |
+|-------|------------|
+| **Frontend** | React 18, TypeScript, Vite |
+| **Styling** | Tailwind CSS, shadcn/ui |
+| **Backend** | Supabase (PostgreSQL, Auth, RLS, Realtime, Storage) |
+| **State** | TanStack Query |
+| **Animations** | Framer Motion |
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+---
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## 🚀 Getting Started
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Prerequisites
+- Node.js 18+ 
+- npm or bun
+- Supabase project
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/your-username/startup-connect-2.git
+cd startup-connect-2
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your Supabase credentials
+
+# Start development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Environment Variables
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Create a `.env` file with:
 
-**Use GitHub Codespaces**
+```env
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
+VITE_SUPABASE_PROJECT_ID=your_project_id
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+---
 
-## What technologies are used for this project?
+## 📁 Project Structure
 
-This project is built with:
+```
+src/
+├── components/
+│   ├── ai/          # AI insight components
+│   ├── auth/        # Protected routes
+│   ├── dashboard/   # Dashboard widgets
+│   ├── match/       # Matching components
+│   ├── messages/    # Chat UI
+│   ├── profile/     # Profile components
+│   ├── startup/     # Startup management
+│   ├── trust/       # Trust system
+│   └── ui/          # shadcn components
+├── hooks/           # Custom React hooks
+├── lib/             # Utilities & AI logic
+├── pages/           # Route components
+└── types/           # TypeScript definitions
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+---
 
-## How can I deploy this project?
+## 🧪 Testing
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+```bash
+# Run tests
+npm run test
 
-## Can I connect a custom domain to my Lovable project?
+# Run tests with UI
+npm run test:ui
+```
 
-Yes, you can!
+---
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 📦 Deployment
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+The app is deployed on Vercel:
+
+```bash
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is built for the Microsoft Imagine Cup competition.
+
+---
+
+## 🎯 Demo Highlights
+
+- **AI-Assisted Matching** — Skill-based talent-startup matching with explainable scores
+- **Real-time Collaboration** — Live messaging, notifications, and activity feeds
+- **Trust & Safety** — Endorsements, trust scores, and user reporting
+
+*Built with ❤️ for startups and the talent who power them.*
