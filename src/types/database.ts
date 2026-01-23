@@ -91,6 +91,7 @@ export interface Startup {
   created_at: string;
   founder?: Profile;
   interest_count?: number;
+  trust_score?: number;
 }
 
 export interface StartupInterest {

@@ -3,8 +3,9 @@ import { motion } from 'framer-motion';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { Startup, Profile, STAGE_LABELS, STAGE_COLORS } from '@/types/database';
-import { Building2, Calendar, ArrowRight } from 'lucide-react';
+import { Building2, Calendar, ArrowRight, Zap, Shield } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { MatchScoreBreakdown } from '@/components/match/MatchScoreBreakdown';
 import { TalentAIInsights } from '@/components/ai/TalentAIInsights';
@@ -15,6 +16,8 @@ interface StartupCardProps {
   startup: Startup;
   interestCount?: number;
   matchScore?: number;
+  showTrustScore?: boolean;
+  onInvest?: (startup: Startup) => void;
 }
 
 function getAvatarUrl(avatarPath: string | null | undefined): string | undefined {
@@ -25,7 +28,7 @@ function getAvatarUrl(avatarPath: string | null | undefined): string | undefined
   return data.publicUrl;
 }
 
-export function StartupCard({ startup, interestCount, matchScore }: StartupCardProps) {
+export function StartupCard({ startup, interestCount, matchScore, showTrustScore, onInvest }: StartupCardProps) {
   const { profile } = useAuth();
   
   const getInitials = (name: string) => {
@@ -89,42 +92,64 @@ export function StartupCard({ startup, interestCount, matchScore }: StartupCardP
           </CardContent>
 
           <CardFooter className="pt-0 border-t border-border/50 relative z-10">
-            <div className="flex items-center justify-between w-full pt-4">
-              <div className="flex items-center gap-2">
-                {startup.founder && (
-                  <>
-                    <Avatar className="h-7 w-7 border border-border">
-                      <AvatarImage src={getAvatarUrl(startup.founder.avatar_url)} />
-                      <AvatarFallback className="text-xs bg-muted">
-                        {getInitials(startup.founder.full_name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm text-muted-foreground truncate max-w-[120px]">
-                      {startup.founder.full_name}
+            <div className="flex flex-col gap-4 w-full pt-4">
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-2">
+                  {startup.founder && (
+                    <>
+                      <Avatar className="h-7 w-7 border border-border">
+                        <AvatarImage src={getAvatarUrl(startup.founder.avatar_url)} />
+                        <AvatarFallback className="text-xs bg-muted">
+                          {getInitials(startup.founder.full_name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm text-muted-foreground truncate max-w-[120px]">
+                        {startup.founder.full_name}
+                      </span>
+                      {showTrustScore && startup.founder?.trust_score !== undefined && (
+                        <div className="flex items-center gap-1 ml-2 px-2 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">
+                          <Shield className="h-3.5 w-3.5 text-blue-600" />
+                          <span className="text-xs font-semibold text-blue-600">
+                            {startup.founder.trust_score}
+                          </span>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+                
+                <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                  {typeof interestCount === 'number' && (
+                    <span className="text-primary font-medium">
+                      {interestCount} interested
                     </span>
-                  </>
-                )}
+                  )}
+                  <div className="flex items-center gap-1">
+                    <Calendar className="h-3.5 w-3.5" />
+                    {formatDistanceToNow(new Date(startup.created_at), { addSuffix: true })}
+                  </div>
+                </div>
               </div>
               
-              <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                {typeof interestCount === 'number' && (
-                  <span className="text-primary font-medium">
-                    {interestCount} interested
-                  </span>
-                )}
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-3.5 w-3.5" />
-                  {formatDistanceToNow(new Date(startup.created_at), { addSuffix: true })}
-                </div>
-                <motion.div
-                  className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity text-primary"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.2 }}
+              {onInvest && (
+                <Button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onInvest(startup);
+                  }}
+                  className="w-full gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
                 >
+                  <Zap className="h-4 w-4" />
+                  Mark as Investment Opportunity
+                </Button>
+              )}
+              
+              <Link to={`/startups/${startup.id}`} className="w-full">
+                <Button variant="outline" className="w-full gap-2">
+                  View Details
                   <ArrowRight className="h-4 w-4" />
-                </motion.div>
-              </div>
+                </Button>
+              </Link>
             </div>
           </CardFooter>
         </Card>

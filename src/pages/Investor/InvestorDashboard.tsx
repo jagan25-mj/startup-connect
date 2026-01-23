@@ -42,7 +42,7 @@ export default function InvestorDashboard() {
       .from('startups')
       .select(`
         *,
-        founder:profiles!startups_founder_id_fkey(id, full_name, avatar_url, skills)
+        founder:profiles!startups_founder_id_fkey(id, full_name, avatar_url, skills, trust_score)
       `)
       .order('created_at', { ascending: false });
 
@@ -107,15 +107,27 @@ export default function InvestorDashboard() {
   }, [startups, searchQuery, industryFilter, stageFilter, sortBy]);
 
   // Get top growing startups based on stage progression and recent activity
+  // Get top growing startups with high trust scores
   const topGrowingStartups = useMemo(() => {
+    const minTrustScore = 60; // Minimum trust score threshold
+    
     const staged = [...startups]
-      .filter(s => s.stage === 'growth' || s.stage === 'scaling')
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .filter(s => (s.stage === 'growth' || s.stage === 'scaling') && (s.founder?.trust_score || 0) >= minTrustScore)
+      .sort((a, b) => {
+        // Sort by trust score first, then by recency
+        const trustDiff = (b.founder?.trust_score || 0) - (a.founder?.trust_score || 0);
+        if (trustDiff !== 0) return trustDiff;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      })
       .slice(0, 5);
     
     const earlyButPromising = [...startups]
-      .filter(s => (s.stage === 'mvp' || s.stage === 'early_stage'))
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .filter(s => (s.stage === 'mvp' || s.stage === 'early_stage') && (s.founder?.trust_score || 0) >= minTrustScore)
+      .sort((a, b) => {
+        const trustDiff = (b.founder?.trust_score || 0) - (a.founder?.trust_score || 0);
+        if (trustDiff !== 0) return trustDiff;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      })
       .slice(0, 5);
     
     return [...staged, ...earlyButPromising].slice(0, 8);
@@ -150,6 +162,13 @@ export default function InvestorDashboard() {
       default: return 'bg-muted text-muted-foreground';
     }
   };
+
+  const handleInvestStartup = useCallback((startup: Startup) => {
+    if (!user) return;
+    
+    // Navigate to pitch report creation page
+    window.location.href = `/startups/${startup.id}?action=create-report`;
+  }, [user]);
 
   return (
     <Layout>
@@ -235,7 +254,12 @@ export default function InvestorDashboard() {
               ) : (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                   {topGrowingStartups.map((startup) => (
-                    <StartupCard key={startup.id} startup={startup} />
+                    <StartupCard 
+                      key={startup.id} 
+                      startup={startup} 
+                      showTrustScore={true}
+                      onInvest={handleInvestStartup}
+                    />
                   ))}
                 </div>
               )}
