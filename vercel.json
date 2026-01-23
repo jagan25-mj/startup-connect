@@ -3,19 +3,10 @@
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "framework": "vite",
-  "nodeVersion": "20.x",
-  "env": [
+  "rewrites": [
     {
-      "key": "VITE_SUPABASE_URL",
-      "value": ""
-    },
-    {
-      "key": "VITE_SUPABASE_PUBLISHABLE_KEY",
-      "value": ""
-    },
-    {
-      "key": "VITE_SUPABASE_PROJECT_ID",
-      "value": ""
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
