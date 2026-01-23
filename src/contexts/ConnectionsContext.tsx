@@ -152,7 +152,27 @@ export function ConnectionsProvider({ children }: { children: ReactNode }) {
     }, [user?.id, fetchConnections]);
 
     const sendConnectionRequest = async (receiverId: string): Promise<{ success: boolean }> => {
-        if (!user) return { success: false };
+        // Authorization check - must be authenticated
+        if (!user) {
+            toast({
+                title: 'Authentication Required',
+                description: 'Please sign in to send connection requests.',
+                variant: 'destructive',
+            });
+            return { success: false };
+        }
+
+        // Input validation - must be valid UUID format
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (!uuidRegex.test(receiverId)) {
+            console.error('[Security] Invalid receiver ID format');
+            toast({
+                title: 'Error',
+                description: 'Invalid user ID.',
+                variant: 'destructive',
+            });
+            return { success: false };
+        }
 
         // Prevent self-connection
         if (user.id === receiverId) {
@@ -164,40 +184,72 @@ export function ConnectionsProvider({ children }: { children: ReactNode }) {
             return { success: false };
         }
 
+        // Check for existing connection (prevent duplicate requests)
+        const existingStatus = getConnectionStatus(receiverId);
+        if (existingStatus !== 'none') {
+            const statusMessages = {
+                connected: 'You are already connected with this user.',
+                pending_sent: 'You already sent a connection request to this user.',
+                pending_received: 'This user already sent you a connection request.',
+            };
+            toast({
+                title: 'Already Connected',
+                description: statusMessages[existingStatus],
+            });
+            return { success: false };
+        }
+
         // Rate limiting
         const rateLimit = await checkRateLimit(user.id, 'connection_request');
         if (!rateLimit.allowed) {
-            throw new RateLimitError(rateLimit.resetAt);
-        }
-
-        const { error } = await supabase
-            .from('connections')
-            .upsert(
-                {
-                    requester_id: user.id,
-                    receiver_id: receiverId,
-                    status: 'pending',
-                },
-                { onConflict: 'requester_id,receiver_id' }
-            );
-
-        if (error) {
             toast({
-                title: 'Error',
-                description: normalizeError(error),
+                title: 'Too Many Requests',
+                description: `Please wait before sending more connection requests.`,
                 variant: 'destructive',
             });
             return { success: false };
         }
 
-        toast({
-            title: 'Connection Request Sent',
-            description: 'Your connection request has been sent.',
-        });
+        try {
+            const { error } = await supabase
+                .from('connections')
+                .upsert(
+                    {
+                        requester_id: user.id,
+                        receiver_id: receiverId,
+                        status: 'pending',
+                    },
+                    { onConflict: 'requester_id,receiver_id' }
+                );
 
-        // Refetch after a delay
-        setTimeout(fetchConnections, 500);
-        return { success: true };
+            if (error) {
+                console.error('[Connections] Insert error:', error.code);
+                toast({
+                    title: 'Error',
+                    description: normalizeError(error),
+                    variant: 'destructive',
+                });
+                return { success: false };
+            }
+
+            toast({
+                title: 'Connection Request Sent',
+                description: 'Your connection request has been sent.',
+            });
+
+            // Force reset the debounce timer to allow immediate refetch after action
+            lastFetchTime.current = 0;
+            setTimeout(fetchConnections, 300);
+            return { success: true };
+        } catch (err) {
+            console.error('[Connections] Unexpected error:', err);
+            toast({
+                title: 'Error',
+                description: 'Failed to send connection request. Please try again.',
+                variant: 'destructive',
+            });
+            return { success: false };
+        }
     };
 
     const acceptConnection = async (connectionId: string) => {
