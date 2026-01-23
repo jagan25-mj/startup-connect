@@ -1,4 +1,4 @@
-export type UserRole = 'founder' | 'talent';
+export type UserRole = 'founder' | 'talent' | 'investor';
 
 export type StartupStage = 'idea' | 'mvp' | 'early_stage' | 'growth' | 'scaling';
 
@@ -19,7 +19,55 @@ export interface Profile {
   resume_uploaded_at?: string | null;
   github_url?: string | null;
   linkedin_url?: string | null;
+  // Investor-specific fields
+  firm_name?: string | null;
+  investment_stage?: string | null;
+  sectors?: string[] | null;
 }
+
+export type PitchRecommendation = 'invest' | 'pass' | 'watch';
+
+export interface PitchReport {
+  id: string;
+  investor_id: string;
+  startup_id: string;
+  score: number;
+  recommendation: PitchRecommendation;
+  summary: string | null;
+  strengths: string[] | null;
+  weaknesses: string[] | null;
+  created_at: string;
+  updated_at: string;
+  startup?: Startup;
+  investor?: Profile;
+}
+
+export const INVESTMENT_STAGES = [
+  'Pre-seed',
+  'Seed',
+  'Series A',
+  'Series B',
+  'Series C+',
+  'Growth',
+] as const;
+
+export const INVESTMENT_SECTORS = [
+  'Technology',
+  'Healthcare',
+  'Finance',
+  'Education',
+  'E-commerce',
+  'AI/ML',
+  'SaaS',
+  'Consumer',
+  'Enterprise',
+  'Gaming',
+  'Social Media',
+  'Green Tech',
+  'Biotech',
+  'Fintech',
+  'Edtech',
+] as const;
 
 export interface ProfileAchievement {
   id: string;
