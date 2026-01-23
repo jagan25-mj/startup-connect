@@ -1,4 +1,23 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+// Mock supabase client BEFORE importing security module
+vi.mock('@/integrations/supabase/client', () => ({
+    supabase: {
+        from: vi.fn(() => ({
+            select: vi.fn().mockReturnThis(),
+            insert: vi.fn().mockReturnThis(),
+            update: vi.fn().mockReturnThis(),
+            eq: vi.fn().mockReturnThis(),
+            maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+        })),
+        rpc: vi.fn().mockResolvedValue({ data: { allowed: true, remaining: 10 }, error: null }),
+        auth: {
+            getSession: vi.fn().mockResolvedValue({ data: { session: null } }),
+            refreshSession: vi.fn().mockResolvedValue({ error: null }),
+        },
+    },
+}));
+
 import { normalizeError, RateLimitError, RATE_LIMITS } from './security';
 import {
     messageSchema,
