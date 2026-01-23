@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Layout } from '@/components/layout/Layout';
@@ -27,6 +27,15 @@ export default function InvestorDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const { user, profile } = useAuth();
   const ITEMS_PER_PAGE = 12;
+  const roleDenyRef = useRef(false);
+  
+  // Verify investor role on mount - prevent non-investors from accessing this page
+  useEffect(() => {
+    if (profile && profile.role !== 'investor' && !roleDenyRef.current) {
+      roleDenyRef.current = true;
+      window.location.href = '/dashboard';
+    }
+  }, [profile]);
 
   const fetchStartups = useCallback(async () => {
     const { data, error } = await supabase

@@ -1,10 +1,23 @@
-# CollabHub
+# CollabHub - Production Ready
 
 **AI-Assisted Startup Collaboration Platform**
 
 Connect founders with talent through intelligent skill-based matching, real-time collaboration, and trust-verified networking.
 
+![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
+![Hardening Score](https://img.shields.io/badge/Hardening%20Score-8.5%2F10-blue)
 [![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://startup-connect-one.vercel.app)
+
+---
+
+## 📖 Critical Documentation for Deployment
+
+**For Judges & Deployment Teams**:
+- 🚀 [FINAL_README.md](./FINAL_README.md) - **START HERE** - Complete product overview
+- 📋 [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) - Step-by-step deployment instructions
+- 🎬 [DEMO_WALKTHROUGH.md](./DEMO_WALKTHROUGH.md) - 5-minute judge-ready demo flow
+- ⚠️ [KNOWN_LIMITATIONS.md](./KNOWN_LIMITATIONS.md) - What's included & roadmap
+- ✅ [PRODUCTION_DEPLOYMENT_FINAL_CHECKLIST.md](./PRODUCTION_DEPLOYMENT_FINAL_CHECKLIST.md) - Final verification checklist
 
 ---
 

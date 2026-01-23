@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Layout } from '@/components/layout/Layout';
@@ -58,8 +58,17 @@ export default function StartupDetail() {
   const navigate = useNavigate();
 
   const isOwner = startup?.founder_id === user?.id;
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const fetchStartup = useCallback(async () => {
+    // Cancel any previous fetch requests
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    
     const { data, error } = await supabase
       .from('startups')
       .select(`
@@ -69,10 +78,11 @@ export default function StartupDetail() {
       .eq('id', id)
       .maybeSingle();
 
-    if (!error && data) {
+    // Only update state if this request wasn't aborted
+    if (!controller.signal.aborted && !error && data) {
       setStartup(data as unknown as Startup);
+      setLoading(false);
     }
-    setLoading(false);
   }, [id]);
 
   const fetchInterests = useCallback(async () => {
@@ -103,6 +113,24 @@ export default function StartupDetail() {
 
   const handleExpressInterest = async () => {
     if (!user || !id) return;
+    
+    // Race condition check: verify user is not already on team
+    const { data: teamCheck } = await supabase
+      .from('startup_team_members')
+      .select('id')
+      .eq('startup_id', id)
+      .eq('user_id', user.id)
+      .limit(1)
+      .maybeSingle();
+    
+    if (teamCheck) {
+      toast({
+        variant: 'destructive',
+        title: 'Already on team',
+        description: 'You are already part of this startup team. You cannot express interest.',
+      });
+      return;
+    }
 
     setActionLoading(true);
 
@@ -138,6 +166,7 @@ export default function StartupDetail() {
           title: 'Error',
           description: 'Failed to express interest. Please try again.',
         });
+
       } else {
         setHasExpressedInterest(true);
         toast({

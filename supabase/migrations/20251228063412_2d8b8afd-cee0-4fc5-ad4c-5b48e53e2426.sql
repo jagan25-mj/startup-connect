@@ -40,11 +40,8 @@ USING (EXISTS (
   AND startups.founder_id = auth.uid()
 ));
 
--- System can insert/update matches (via functions)
-CREATE POLICY "System can manage matches"
-ON public.matches FOR ALL
-USING (true)
-WITH CHECK (true);
+-- Matches are managed ONLY by SECURITY DEFINER functions and triggers
+-- No direct user access allowed - preventing unauthorized match creation
 
 -- RLS policies for notifications
 -- Users can view their own notifications
@@ -57,10 +54,10 @@ CREATE POLICY "Users can update own notifications"
 ON public.notifications FOR UPDATE
 USING (auth.uid() = user_id);
 
--- System can insert notifications
-CREATE POLICY "System can create notifications"
+-- Authenticated users can only insert their own notifications via SECURITY DEFINER functions
+CREATE POLICY "Authenticated users can insert own notifications"
 ON public.notifications FOR INSERT
-WITH CHECK (true);
+WITH CHECK (auth.uid() = user_id);
 
 -- Create indexes for performance
 CREATE INDEX idx_matches_startup_id ON public.matches(startup_id);

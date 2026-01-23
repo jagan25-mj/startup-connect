@@ -97,7 +97,9 @@ export function StartupUpdateForm({ startupId, startupName, onSuccess, onCancel 
     setUploading(true);
     try {
       const fileExt = mediaFile.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      // Sanitize filename to prevent path traversal and storage policy violations
+      const sanitizedName = mediaFile.name.replace(/[^a-zA-Z0-9.-]/g, '_').toLowerCase();
+      const fileName = `${user.id}/${Date.now()}-${sanitizedName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('startup-updates')

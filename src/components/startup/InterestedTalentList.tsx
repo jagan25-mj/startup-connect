@@ -49,12 +49,27 @@ export function InterestedTalentList({ startupId, startupName, interests }: Inte
   const [roleInTeam, setRoleInTeam] = useState('');
 
   const handleAccept = async (userId: string, userName: string) => {
+    // Verify talent is still interested (prevent stale state)
+    const stillInterested = interests.some(i => i.user_id === userId);
+    if (!stillInterested) {
+      return;
+    }
+    
     setSelectedTalent({ id: userId, name: userName });
     setShowRoleDialog(true);
   };
 
   const confirmAccept = async () => {
     if (!selectedTalent || !user) return;
+    
+    // Double-check talent is still interested and not already on team
+    const stillInterested = interests.some(i => i.user_id === selectedTalent.id);
+    const alreadyOnTeam = isTeamMember(selectedTalent.id);
+    
+    if (!stillInterested || alreadyOnTeam) {
+      return;
+    }
+    
     
     setAcceptingId(selectedTalent.id);
     await addTeamMember(selectedTalent.id, roleInTeam || undefined);

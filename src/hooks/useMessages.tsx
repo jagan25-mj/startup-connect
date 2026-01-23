@@ -13,50 +13,41 @@ export function useMessages(conversationId?: string) {
   const fetchConversations = useCallback(async () => {
     if (!user) return;
 
+    // Optimized query: fetch messages in single query to avoid N+1
     const { data, error } = await supabase
       .from('conversations')
       .select(`
         *,
         participant_one_profile:profiles!conversations_participant_one_fkey(id, full_name, avatar_url, role),
-        participant_two_profile:profiles!conversations_participant_two_fkey(id, full_name, avatar_url, role)
+        participant_two_profile:profiles!conversations_participant_two_fkey(id, full_name, avatar_url, role),
+        messages(id, read, sender_id, created_at, content)
       `)
       .or(`participant_one.eq.${user.id},participant_two.eq.${user.id}`)
       .order('last_message_at', { ascending: false });
 
     if (!error && data) {
-      // Process conversations to get other participant and unread count
-      const processedConversations = await Promise.all(
-        data.map(async (conv: Conversation & { participant_one_profile: Partial<Profile>; participant_two_profile: Partial<Profile> }) => {
-          const otherParticipant = 
-            conv.participant_one === user.id 
-              ? conv.participant_two_profile 
-              : conv.participant_one_profile;
+      const processedConversations = data.map((conv: any) => {
+        const otherParticipant = 
+          conv.participant_one === user.id 
+            ? conv.participant_two_profile 
+            : conv.participant_one_profile;
 
-          // Get last message
-          const { data: lastMsgData } = await supabase
-            .from('messages')
-            .select('*')
-            .eq('conversation_id', conv.id)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
+        // Calculate unread count and find last message from already-fetched data
+        const unreadCount = (conv.messages || []).filter(
+          (m: any) => !m.read && m.sender_id !== user.id
+        ).length;
 
-          // Get unread count
-          const { count } = await supabase
-            .from('messages')
-            .select('*', { count: 'exact', head: true })
-            .eq('conversation_id', conv.id)
-            .eq('read', false)
-            .neq('sender_id', user.id);
+        const lastMessage = (conv.messages || [])
+          .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          [0] || null;
 
-          return {
-            ...conv,
-            other_participant: otherParticipant as Profile,
-            last_message: lastMsgData,
-            unread_count: count || 0,
-          };
-        })
-      );
+        return {
+          ...conv,
+          other_participant: otherParticipant as Profile,
+          last_message: lastMessage,
+          unread_count: unreadCount,
+        };
+      });
 
       setConversations(processedConversations);
       setTotalUnread(processedConversations.reduce((sum, c) => sum + (c.unread_count || 0), 0));
