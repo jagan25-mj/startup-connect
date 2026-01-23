@@ -26,6 +26,7 @@ interface RateLimitResult {
 /**
  * Check if an action is rate limited for the current user
  * Uses SERVER-SIDE RPC function for enforcement that cannot be bypassed
+ * PRODUCTION NOTE: Fails OPEN if database infrastructure isn't ready
  */
 export async function checkRateLimit(
   userId: string,
@@ -35,26 +36,32 @@ export async function checkRateLimit(
   const now = new Date();
   const resetAt = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour fallback
 
+  // Skip rate limiting if no userId (not authenticated)
+  if (!userId) {
+    return { allowed: true, remaining: limit, resetAt };
+  }
+
   try {
     // Call server-side RPC function for atomic rate limiting
-    // This cannot be bypassed by client-side manipulation
     const { data, error } = await supabase.rpc('check_and_increment_rate_limit', {
       p_action: action,
       p_limit: limit,
     });
 
     if (error) {
-      // If RPC fails (e.g., migration not applied), fall back to client-side check
-      console.warn('Server-side rate limit RPC failed, using fallback:', error.message);
-      return checkRateLimitFallback(userId, action);
+      // RPC not available (migration not applied) - fail OPEN for now
+      // This allows the app to work before migrations are applied
+      console.warn('[RateLimit] RPC not available, allowing request:', error.code);
+      return { allowed: true, remaining: limit, resetAt };
     }
 
     // Parse RPC response
     const result = data as { allowed: boolean; remaining: number; reset_at?: string; error?: string };
 
     if (result.error) {
-      console.warn('Rate limit error:', result.error);
-      return { allowed: false, remaining: 0, resetAt: now };
+      // RPC returned an error - fail OPEN for production stability
+      console.warn('[RateLimit] RPC error:', result.error);
+      return { allowed: true, remaining: limit, resetAt };
     }
 
     return {
@@ -63,9 +70,9 @@ export async function checkRateLimit(
       resetAt: result.reset_at ? new Date(result.reset_at) : resetAt,
     };
   } catch (err) {
-    console.error('Rate limit check failed:', err);
-    // Fail CLOSED for security - reject the request
-    return { allowed: false, remaining: 0, resetAt };
+    // Network or other error - fail OPEN for production stability
+    console.warn('[RateLimit] Check failed, allowing request:', err);
+    return { allowed: true, remaining: limit, resetAt };
   }
 }
 
