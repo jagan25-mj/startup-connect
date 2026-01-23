@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { useConnections } from '@/hooks/useConnections';
+import { useConnections } from '@/contexts/ConnectionsContext';
 import { useAuth } from '@/hooks/useAuth';
 import { UserPlus, UserCheck, Clock, UserMinus, Loader2 } from 'lucide-react';
 import {

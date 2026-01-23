@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/select';
 import { Profile, SKILLS, UserRole } from '@/types/database';
 import { useAuth } from '@/hooks/useAuth';
-import { useConnections } from '@/hooks/useConnections';
+import { useConnections } from '@/contexts/ConnectionsContext';
 import { ConnectButton } from '@/components/connections/ConnectButton';
 import { TrustScoreCompact } from '@/components/trust/TrustScore';
 import { motion } from 'framer-motion';
@@ -148,11 +148,10 @@ export default function Network() {
 
               <Badge
                 variant="secondary"
-                className={`mt-1 text-xs ${
-                  profile.role === 'founder'
+                className={`mt-1 text-xs ${profile.role === 'founder'
                     ? 'bg-primary/10 text-primary'
                     : 'bg-accent/10 text-accent'
-                }`}
+                  }`}
               >
                 {profile.role === 'founder' ? 'Founder' : 'Talent'}
               </Badge>
