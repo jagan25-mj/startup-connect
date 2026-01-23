@@ -162,10 +162,11 @@ export default function StartupDetail() {
         .insert({ startup_id: id, user_id: user.id, interest_type: interestType });
 
       if (error) {
+        console.error('Express interest error:', error);
         toast({
           variant: 'destructive',
           title: 'Error',
-          description: 'Failed to express interest. Please try again.',
+          description: error.message || 'Failed to express interest. Please try again.',
         });
 
       } else {
