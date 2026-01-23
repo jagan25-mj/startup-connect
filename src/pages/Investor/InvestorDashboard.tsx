@@ -171,7 +171,7 @@ export default function InvestorDashboard() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-2 mb-8">
+        <div className="grid gap-4 md:grid-cols-3 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Startups Reviewed</CardTitle>
@@ -189,6 +189,17 @@ export default function InvestorDashboard() {
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
                 {pitchReports.filter(r => r.recommendation === 'invest').length}
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Growing Startups</CardTitle>
+              <TrendingUp className="h-4 w-4 text-blue-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-600">
+                {topGrowingStartups.length}
               </div>
             </CardContent>
           </Card>
