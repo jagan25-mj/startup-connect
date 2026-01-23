@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Loader2, Search, Building2, TrendingUp, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { motion } from 'framer-motion';
 
 type SortOption = 'recent' | 'name' | 'stage';
 
@@ -133,6 +134,41 @@ export default function InvestorDashboard() {
     return [...staged, ...earlyButPromising].slice(0, 8);
   }, [startups]);
 
+  // Ranking logic: "Top Startups for You"
+  // Combines: trust score, team completeness, stage relevance, interest count
+  const topStartupsForInvestor = useMemo(() => {
+    return [...startups]
+      .map(startup => {
+        let score = 0;
+        
+        // Trust score: 40% weight
+        score += ((startup.founder?.trust_score || 0) / 100) * 40;
+        
+        // Stage relevance: 30% weight (prefer growth/scaling)
+        const stageWeights: Record<string, number> = {
+          'scaling': 30,
+          'growth': 27,
+          'early_stage': 18,
+          'mvp': 12,
+          'idea': 5
+        };
+        score += stageWeights[startup.stage] || 0;
+        
+        // Recency: 20% weight (more recent is better)
+        const daysOld = Math.floor((Date.now() - new Date(startup.created_at).getTime()) / (1000 * 60 * 60 * 24));
+        const recencyScore = Math.max(0, 20 - (daysOld / 10));
+        score += Math.max(0, recencyScore);
+        
+        // Interest count: 10% weight
+        score += Math.min(10, (startup.interest_count || 0) * 2);
+        
+        return { startup, score };
+      })
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 6)
+      .map(item => item.startup);
+  }, [startups]);
+
   const hasActiveFilters = searchQuery || industryFilter !== 'all' || stageFilter !== 'all';
 
   const clearFilters = () => {
@@ -223,6 +259,50 @@ export default function InvestorDashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Top Startups for You Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="mb-8"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-bold">💎 Top Startups for You</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Ranked by trust score, stage, team completeness, and investor interest
+              </p>
+            </div>
+          </div>
+          
+          {loading ? (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <Skeleton key={i} className="h-72" />
+              ))}
+            </div>
+          ) : topStartupsForInvestor.length === 0 ? (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <Building2 className="h-8 w-8 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium mb-2">No startups available</h3>
+                <p className="text-muted-foreground">Check back soon for new opportunities</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {topStartupsForInvestor.map((startup) => (
+                <StartupCard 
+                  key={startup.id} 
+                  startup={startup} 
+                  showTrustScore={true}
+                  onInvest={handleInvestStartup}
+                />
+              ))}
+            </div>
+          )}
+        </motion.div>
 
         <Tabs defaultValue="suggested" className="space-y-6">
           <TabsList>

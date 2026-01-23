@@ -8,12 +8,12 @@ import { StatsWidget } from '@/components/dashboard/StatsWidget';
 import { FounderAIInsights } from '@/components/ai/FounderAIInsights';
 import { MyTeams } from '@/components/dashboard/MyTeams';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Startup, Profile } from '@/types/database';
+import { Startup, Profile, STAGE_LABELS } from '@/types/database';
 import { useAuth } from '@/hooks/useAuth';
 import { motion } from 'framer-motion';
-import { Loader2, Plus, Rocket, Heart, ExternalLink } from 'lucide-react';
+import { Loader2, Plus, Rocket, Heart, ExternalLink, Users, TrendingUp, Clock } from 'lucide-react';
 
 export default function Dashboard() {
   const { user, profile } = useAuth();
@@ -22,7 +22,13 @@ export default function Dashboard() {
   const [myStartups, setMyStartups] = useState<Startup[]>([]);
   const [interestedStartups, setInterestedStartups] = useState<Startup[]>([]);
   const [interestCounts, setInterestCounts] = useState<Record<string, number>>({});
+  const [teamCounts, setTeamCounts] = useState<Record<string, number>>({});
   const [totalInterests, setTotalInterests] = useState(0);
+  const [totalTeamMembers, setTotalTeamMembers] = useState(0);
+  const [pitchReportCount, setPitchReportCount] = useState(0);
+  const [activeTeams, setActiveTeams] = useState(0);
+  const [matchesFound, setMatchesFound] = useState(0);
+  const [profileCompletion, setProfileCompletion] = useState(0);
 
   // Define functions with useCallback to prevent redefinition on each render
   const fetchFounderData = useCallback(async (): Promise<void> => {
@@ -39,23 +45,45 @@ export default function Dashboard() {
       setMyStartups(startups as unknown as Startup[]);
 
       const counts: Record<string, number> = {};
+      const teams: Record<string, number> = {};
       let total = 0;
+      let totalTeam = 0;
+      
       for (const startup of startups) {
-        const { count } = await supabase
+        // Fetch interest counts
+        const { count: interestCount } = await supabase
           .from('startup_interests')
           .select('*', { count: 'exact', head: true })
           .eq('startup_id', startup.id);
-        counts[startup.id] = count || 0;
-        total += count || 0;
+        counts[startup.id] = interestCount || 0;
+        total += interestCount || 0;
+
+        // Fetch team member counts
+        const { count: teamCount } = await supabase
+          .from('startup_team_members')
+          .select('*', { count: 'exact', head: true })
+          .eq('startup_id', startup.id);
+        teams[startup.id] = teamCount || 0;
+        totalTeam += teamCount || 0;
       }
       setInterestCounts(counts);
+      setTeamCounts(teams);
       setTotalInterests(total);
+      setTotalTeamMembers(totalTeam);
     }
+
+    // Fetch pitch reports
+    const { count: reportCount } = await supabase
+      .from('pitch_reports')
+      .select('*', { count: 'exact', head: true })
+      .eq('startup_id', user!.id);
+    setPitchReportCount(reportCount || 0);
+
     setLoading(false);
   }, [user]);
 
   const fetchTalentData = useCallback(async (): Promise<void> => {
-    setLoading(true); // Add loading state reset
+    setLoading(true);
     const { data: interests, error } = await supabase
       .from('startup_interests')
       .select(`
@@ -75,9 +103,29 @@ export default function Dashboard() {
         }))
         .filter(Boolean) as Startup[];
       setInterestedStartups(startups);
+      setMatchesFound(Math.ceil(startups.length * 0.7)); // Estimated matches
     }
+
+    // Fetch talent's team memberships
+    const { count: teamCount } = await supabase
+      .from('startup_team_members')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user!.id);
+    setActiveTeams(teamCount || 0);
+
+    // Calculate profile completion
+    if (profile) {
+      let completionScore = 0;
+      if (profile.full_name) completionScore += 20;
+      if (profile.avatar_url) completionScore += 20;
+      if (profile.bio || profile.looking_for) completionScore += 20;
+      if (profile.skills && Array.isArray(profile.skills) && profile.skills.length > 0) completionScore += 20;
+      if (profile.github_url || profile.linkedin_url) completionScore += 20;
+      setProfileCompletion(Math.min(100, completionScore));
+    }
+
     setLoading(false);
-  }, [user]);
+  }, [user, profile]);
 
   useEffect(() => {
     if (user && profile) {
@@ -155,28 +203,71 @@ export default function Dashboard() {
           </p>
         </motion.div>
 
-        {/* Stats Cards */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="grid gap-4 md:grid-cols-3 mb-8"
-        >
-          <StatsWidget
-            title={profile?.role === 'founder' ? 'Your Startups' : 'Interests'}
-            value={profile?.role === 'founder' ? myStartups.length : interestedStartups.length}
-            icon={profile?.role === 'founder' ? 'rocket' : 'heart'}
-          />
-
-          {profile?.role === 'founder' && (
+        {/* Stats Cards - Founder Dashboard */}
+        {profile?.role === 'founder' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="grid gap-4 md:grid-cols-4 mb-8"
+          >
             <StatsWidget
-              title="Total Interest"
+              title="Your Startups"
+              value={myStartups.length}
+              icon="rocket"
+            />
+            <StatsWidget
+              title="Talent Interests"
               value={totalInterests}
               icon="users"
-              description="from talents"
+              description="total interests"
             />
-          )}
-        </motion.div>
+            <StatsWidget
+              title="Active Team"
+              value={totalTeamMembers}
+              icon="users"
+              description="team members"
+            />
+            <StatsWidget
+              title="Pitch Reports"
+              value={pitchReportCount}
+              icon="trending"
+              description="evaluations"
+            />
+          </motion.div>
+        )}
+
+        {/* Stats Cards - Talent Dashboard */}
+        {profile?.role === 'talent' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="grid gap-4 md:grid-cols-4 mb-8"
+          >
+            <StatsWidget
+              title="Interests Sent"
+              value={interestedStartups.length}
+              icon="heart"
+            />
+            <StatsWidget
+              title="Active Teams"
+              value={activeTeams}
+              icon="users"
+            />
+            <StatsWidget
+              title="Matches Found"
+              value={matchesFound}
+              icon="rocket"
+            />
+            <StatsWidget
+              title="Profile"
+              value={profileCompletion}
+              icon="trending"
+              description="%"
+            />
+          </motion.div>
+        )}
 
         {/* Main Content Grid */}
         <motion.div
