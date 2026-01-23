@@ -156,10 +156,39 @@ export default function StartupDetail() {
         fetchInterests();
       }
     } else {
+      setActionLoading(true);
       const interestType = profile?.role === 'investor' ? 'investor' : 'talent';
-      const { error } = await supabase
+      
+      // Try inserting with interest_type (new column), fall back without if column doesn't exist
+      let insertData: any = { startup_id: id, user_id: user.id };
+      
+      // Try with interest_type first
+      let { error } = await supabase
         .from('startup_interests')
-        .insert({ startup_id: id, user_id: user.id, interest_type: interestType });
+        .insert({ ...insertData, interest_type: interestType });
+
+      // If error about missing column, retry without it (fallback)
+      if (error && error.message?.includes('interest_type')) {
+        console.warn('interest_type column not yet available, inserting without it');
+        const { error: fallbackError } = await supabase
+          .from('startup_interests')
+          .insert(insertData);
+        
+        if (!fallbackError) {
+          setHasExpressedInterest(true);
+          const isInvestor = profile?.role === 'investor';
+          toast({
+            title: 'Interest expressed!',
+            description: isInvestor 
+              ? 'The founder will be notified of your investor interest.'
+              : 'The founder will be notified of your interest.',
+          });
+          fetchInterests();
+          setActionLoading(false);
+          return;
+        }
+        error = fallbackError;
+      }
 
       if (error) {
         console.error('Express interest error:', error);
@@ -180,9 +209,9 @@ export default function StartupDetail() {
         });
         fetchInterests();
       }
-    }
 
-    setActionLoading(false);
+      setActionLoading(false);
+    }
   };
 
   const handleDelete = async () => {
