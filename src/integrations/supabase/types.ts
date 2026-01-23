@@ -256,6 +256,60 @@ export type Database = {
           },
         ]
       }
+      pitch_reports: {
+        Row: {
+          created_at: string
+          id: string
+          investor_id: string
+          recommendation: string
+          score: number
+          startup_id: string
+          strengths: string[] | null
+          summary: string | null
+          updated_at: string
+          weaknesses: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          investor_id: string
+          recommendation: string
+          score: number
+          startup_id: string
+          strengths?: string[] | null
+          summary?: string | null
+          updated_at?: string
+          weaknesses?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          investor_id?: string
+          recommendation?: string
+          score?: number
+          startup_id?: string
+          strengths?: string[] | null
+          summary?: string | null
+          updated_at?: string
+          weaknesses?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pitch_reports_investor_id_fkey"
+            columns: ["investor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pitch_reports_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_achievements: {
         Row: {
           achievement_type: string
@@ -305,42 +359,51 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           created_at: string
+          firm_name: string | null
           full_name: string
           github_url: string | null
           id: string
+          investment_stage: string | null
           linkedin_url: string | null
           resume_filename: string | null
           resume_uploaded_at: string | null
           resume_url: string | null
           role: Database["public"]["Enums"]["user_role"]
+          sectors: string[] | null
           skills: string[] | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          firm_name?: string | null
           full_name: string
           github_url?: string | null
           id: string
+          investment_stage?: string | null
           linkedin_url?: string | null
           resume_filename?: string | null
           resume_uploaded_at?: string | null
           resume_url?: string | null
           role: Database["public"]["Enums"]["user_role"]
+          sectors?: string[] | null
           skills?: string[] | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          firm_name?: string | null
           full_name?: string
           github_url?: string | null
           id?: string
+          investment_stage?: string | null
           linkedin_url?: string | null
           resume_filename?: string | null
           resume_uploaded_at?: string | null
           resume_url?: string | null
           role?: Database["public"]["Enums"]["user_role"]
+          sectors?: string[] | null
           skills?: string[] | null
         }
         Relationships: []
@@ -575,7 +638,7 @@ export type Database = {
     }
     Enums: {
       startup_stage: "idea" | "mvp" | "early_stage" | "growth" | "scaling"
-      user_role: "founder" | "talent"
+      user_role: "founder" | "talent" | "investor"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -704,7 +767,7 @@ export const Constants = {
   public: {
     Enums: {
       startup_stage: ["idea", "mvp", "early_stage", "growth", "scaling"],
-      user_role: ["founder", "talent"],
+      user_role: ["founder", "talent", "investor"],
     },
   },
 } as const

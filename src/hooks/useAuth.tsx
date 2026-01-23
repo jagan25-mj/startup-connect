@@ -9,7 +9,7 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   profileLoading: boolean;
-  signUp: (email: string, password: string, fullName: string, role: 'founder' | 'talent') => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, fullName: string, role: 'founder' | 'talent' | 'investor') => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -83,7 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const signUp = async (email: string, password: string, fullName: string, role: 'founder' | 'talent') => {
+  const signUp = async (email: string, password: string, fullName: string, role: 'founder' | 'talent' | 'investor') => {
     const redirectUrl = `${window.location.origin}/`;
 
     const { error } = await supabase.auth.signUp({

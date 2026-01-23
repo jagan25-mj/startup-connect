@@ -10,14 +10,14 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ArrowLeft, Lightbulb, Users } from 'lucide-react';
+import { Loader2, ArrowLeft, Lightbulb, Users, Building2 } from 'lucide-react';
 import collabhubLogo from '@/assets/collabhub-logo.png';
 
 const registerSchema = z.object({
   fullName: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  role: z.enum(['founder', 'talent'], { required_error: 'Please select a role' }),
+  role: z.enum(['founder', 'talent', 'investor'], { required_error: 'Please select a role' }),
 });
 
 type RegisterForm = z.infer<typeof registerSchema>;
@@ -139,37 +139,43 @@ export default function Register() {
                 <Label>I am a...</Label>
                 <RadioGroup
                   value={selectedRole || ''}
-                  onValueChange={(value) => setValue('role', value as 'founder' | 'talent')}
-                  className="grid grid-cols-2 gap-3"
+                  onValueChange={(value) => setValue('role', value as 'founder' | 'talent' | 'investor')}
+                  className="grid grid-cols-3 gap-3"
                 >
                   <Label
                     htmlFor="founder"
-                    className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 cursor-pointer transition-all ${selectedRole === 'founder'
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-primary/50'
-                      }`}
+                    className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 cursor-pointer transition-all ${selectedRole === 'founder' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}
                   >
                     <RadioGroupItem value="founder" id="founder" className="sr-only" />
                     <div className={`rounded-full p-2 ${selectedRole === 'founder' ? 'bg-primary/10' : 'bg-muted'}`}>
                       <Lightbulb className={`h-5 w-5 ${selectedRole === 'founder' ? 'text-primary' : 'text-muted-foreground'}`} />
                     </div>
-                    <span className="font-medium">Founder</span>
-                    <span className="text-xs text-muted-foreground text-center">I have a startup idea</span>
+                    <span className="font-medium text-sm">Founder</span>
+                    <span className="text-xs text-muted-foreground text-center">I have an idea</span>
                   </Label>
 
                   <Label
                     htmlFor="talent"
-                    className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 cursor-pointer transition-all ${selectedRole === 'talent'
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-primary/50'
-                      }`}
+                    className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 cursor-pointer transition-all ${selectedRole === 'talent' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}
                   >
                     <RadioGroupItem value="talent" id="talent" className="sr-only" />
                     <div className={`rounded-full p-2 ${selectedRole === 'talent' ? 'bg-primary/10' : 'bg-muted'}`}>
                       <Users className={`h-5 w-5 ${selectedRole === 'talent' ? 'text-primary' : 'text-muted-foreground'}`} />
                     </div>
-                    <span className="font-medium">Talent</span>
-                    <span className="text-xs text-muted-foreground text-center">I want to join a team</span>
+                    <span className="font-medium text-sm">Talent</span>
+                    <span className="text-xs text-muted-foreground text-center">Join a team</span>
+                  </Label>
+
+                  <Label
+                    htmlFor="investor"
+                    className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 cursor-pointer transition-all ${selectedRole === 'investor' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}
+                  >
+                    <RadioGroupItem value="investor" id="investor" className="sr-only" />
+                    <div className={`rounded-full p-2 ${selectedRole === 'investor' ? 'bg-primary/10' : 'bg-muted'}`}>
+                      <Building2 className={`h-5 w-5 ${selectedRole === 'investor' ? 'text-primary' : 'text-muted-foreground'}`} />
+                    </div>
+                    <span className="font-medium text-sm">Investor</span>
+                    <span className="text-xs text-muted-foreground text-center">Fund startups</span>
                   </Label>
                 </RadioGroup>
                 {errors.role && (

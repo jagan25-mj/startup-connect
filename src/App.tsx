@@ -25,7 +25,7 @@ import PublicProfile from "./pages/Profile/PublicProfile";
 import EditProfile from "./pages/Profile/EditProfile";
 import Messages from "./pages/Messages/Messages";
 import Network from "./pages/Network";
-
+import InvestorDashboard from "./pages/Investor/InvestorDashboard";
 
 const queryClient = new QueryClient();
 
@@ -136,6 +136,16 @@ const AppContent = () => {
             <PageTransition>
               <ProtectedRoute>
                 <Network />
+              </ProtectedRoute>
+            </PageTransition>
+          }
+          />
+        <Route
+          path="/investor/dashboard"
+          element={
+            <PageTransition>
+              <ProtectedRoute requiredRole="investor">
+                <InvestorDashboard />
               </ProtectedRoute>
             </PageTransition>
           }
