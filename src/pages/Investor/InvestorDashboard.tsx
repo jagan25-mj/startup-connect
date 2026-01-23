@@ -224,7 +224,7 @@ export default function InvestorDashboard() {
           </Card>
         </div>
 
-        <Tabs defaultValue="browse" className="space-y-6">
+        <Tabs defaultValue="suggested" className="space-y-6">
           <TabsList>
             <TabsTrigger value="suggested">AI Suggested Startups</TabsTrigger>
             <TabsTrigger value="browse">Browse Startups</TabsTrigger>
@@ -233,9 +233,9 @@ export default function InvestorDashboard() {
 
           <TabsContent value="suggested" className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold mb-4">AI Suggested Top Growing Startups</h3>
+              <h3 className="text-lg font-semibold mb-4">🚀 Top Growing Startups - High Trust Founders</h3>
               <p className="text-sm text-muted-foreground mb-6">
-                Startups showing strong growth indicators and recent activity
+                AI-curated startups with founders who have high trust scores. These are high-potential investment opportunities with vetted founders at growth and scaling stages.
               </p>
               {loading ? (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
