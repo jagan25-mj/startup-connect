@@ -4,7 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Layout } from '@/components/layout/Layout';
 import { StartupCard } from '@/components/startup/StartupCard';
 import { RecommendedStartups } from '@/components/dashboard/RecommendedStartups';
-import { TopTalentMatches } from '@/components/dashboard/TopTalentMatches';
 import { StatsWidget } from '@/components/dashboard/StatsWidget';
 import { FounderAIInsights } from '@/components/ai/FounderAIInsights';
 import { MyTeams } from '@/components/dashboard/MyTeams';
@@ -13,14 +12,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Startup, Profile } from '@/types/database';
 import { useAuth } from '@/hooks/useAuth';
-import { useMatches } from '@/hooks/useMatches';
 import { motion } from 'framer-motion';
 import { Loader2, Plus, Rocket, Heart, ExternalLink } from 'lucide-react';
 
 export default function Dashboard() {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
-  const { matches } = useMatches();
   const [loading, setLoading] = useState(true);
   const [myStartups, setMyStartups] = useState<Startup[]>([]);
   const [interestedStartups, setInterestedStartups] = useState<Startup[]>([]);
@@ -127,8 +124,8 @@ export default function Dashboard() {
           >
             <Skeleton className="h-10 w-64 mb-2" />
             <Skeleton className="h-5 w-96 mb-8" />
-            <div className="grid gap-4 md:grid-cols-4 mb-8">
-              {[1, 2, 3, 4].map((i) => (
+            <div className="grid gap-4 md:grid-cols-3 mb-8">
+              {[1, 2, 3].map((i) => (
                 <Skeleton key={i} className="h-24" />
               ))}
             </div>
@@ -137,10 +134,6 @@ export default function Dashboard() {
       </Layout>
     );
   }
-
-  const avgMatchScore = matches.length > 0
-    ? Math.round(matches.reduce((sum, m) => sum + m.score, 0) / matches.length)
-    : 0;
 
   return (
     <Layout>
@@ -167,7 +160,7 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="grid gap-4 md:grid-cols-4 mb-8"
+          className="grid gap-4 md:grid-cols-3 mb-8"
         >
           <StatsWidget
             title={profile?.role === 'founder' ? 'Your Startups' : 'Interests'}
@@ -183,18 +176,6 @@ export default function Dashboard() {
               description="from talents"
             />
           )}
-
-          <StatsWidget
-            title="Top Matches"
-            value={matches.length}
-            icon="trending"
-          />
-
-          <StatsWidget
-            title="Avg Match Score"
-            value={avgMatchScore > 0 ? `${avgMatchScore}%` : 'N/A'}
-            icon="trending"
-          />
         </motion.div>
 
         {/* Main Content Grid */}
@@ -308,13 +289,11 @@ export default function Dashboard() {
               />
             )}
             
-            {profile?.role === 'talent' ? (
+            {profile?.role === 'talent' && (
               <>
                 <MyTeams />
                 <RecommendedStartups />
               </>
-            ) : (
-              <TopTalentMatches />
             )}
           </div>
         </motion.div>

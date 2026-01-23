@@ -106,6 +106,21 @@ export default function InvestorDashboard() {
     return result;
   }, [startups, searchQuery, industryFilter, stageFilter, sortBy]);
 
+  // Get top growing startups based on stage progression and recent activity
+  const topGrowingStartups = useMemo(() => {
+    const staged = [...startups]
+      .filter(s => s.stage === 'growth' || s.stage === 'scaling')
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 5);
+    
+    const earlyButPromising = [...startups]
+      .filter(s => (s.stage === 'mvp' || s.stage === 'early_stage'))
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 5);
+    
+    return [...staged, ...earlyButPromising].slice(0, 8);
+  }, [startups]);
+
   const hasActiveFilters = searchQuery || industryFilter !== 'all' || stageFilter !== 'all';
 
   const clearFilters = () => {
@@ -156,7 +171,7 @@ export default function InvestorDashboard() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-3 mb-8">
+        <div className="grid gap-4 md:grid-cols-2 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Startups Reviewed</CardTitle>
@@ -177,22 +192,44 @@ export default function InvestorDashboard() {
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Startups</CardTitle>
-              <Building2 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{startups.length}</div>
-            </CardContent>
-          </Card>
         </div>
 
         <Tabs defaultValue="browse" className="space-y-6">
           <TabsList>
+            <TabsTrigger value="suggested">AI Suggested Startups</TabsTrigger>
             <TabsTrigger value="browse">Browse Startups</TabsTrigger>
             <TabsTrigger value="reports">My Pitch Reports</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="suggested" className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold mb-4">AI Suggested Top Growing Startups</h3>
+              <p className="text-sm text-muted-foreground mb-6">
+                Startups showing strong growth indicators and recent activity
+              </p>
+              {loading ? (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <Skeleton key={i} className="h-64" />
+                  ))}
+                </div>
+              ) : topGrowingStartups.length === 0 ? (
+                <div className="text-center py-16">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
+                    <Building2 className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-lg font-medium mb-2">No growing startups found</h3>
+                  <p className="text-muted-foreground">Check back later for new opportunities</p>
+                </div>
+              ) : (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {topGrowingStartups.map((startup) => (
+                    <StartupCard key={startup.id} startup={startup} />
+                  ))}
+                </div>
+              )}
+            </div>
+          </TabsContent>
 
           <TabsContent value="browse" className="space-y-6">
             {/* Filters Bar */}

@@ -97,6 +97,7 @@ export interface StartupInterest {
   id: string;
   startup_id: string;
   user_id: string;
+  interest_type?: 'talent' | 'investor';
   created_at: string;
   user?: Profile;
   startup?: Startup;

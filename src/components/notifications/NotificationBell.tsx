@@ -19,6 +19,8 @@ export function NotificationBell() {
     switch (type) {
       case 'interest':
         return '❤️';
+      case 'investor_interest':
+        return '💼';
       case 'match':
         return '✨';
       case 'message':
@@ -30,7 +32,7 @@ export function NotificationBell() {
 
   const getNotificationLink = (notification: { type: string; related_id: string | null }) => {
     if (notification.related_id) {
-      if (notification.type === 'interest') {
+      if (notification.type === 'interest' || notification.type === 'investor_interest') {
         return `/startups/${notification.related_id}`;
       }
       if (notification.type === 'message') {

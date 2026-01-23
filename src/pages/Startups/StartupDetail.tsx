@@ -156,9 +156,10 @@ export default function StartupDetail() {
         fetchInterests();
       }
     } else {
+      const interestType = profile?.role === 'investor' ? 'investor' : 'talent';
       const { error } = await supabase
         .from('startup_interests')
-        .insert({ startup_id: id, user_id: user.id });
+        .insert({ startup_id: id, user_id: user.id, interest_type: interestType });
 
       if (error) {
         toast({
@@ -169,9 +170,12 @@ export default function StartupDetail() {
 
       } else {
         setHasExpressedInterest(true);
+        const isInvestor = profile?.role === 'investor';
         toast({
           title: 'Interest expressed!',
-          description: 'The founder will be notified of your interest.',
+          description: isInvestor 
+            ? 'The founder will be notified of your investor interest.'
+            : 'The founder will be notified of your interest.',
         });
         fetchInterests();
       }

@@ -60,11 +60,15 @@ export function ProfileCard({ profile, showTrustScore = true, compact = false }:
                   variant="secondary"
                   className={profile.role === 'founder'
                     ? 'bg-primary/10 text-primary'
+                    : profile.role === 'investor'
+                    ? 'bg-amber-500/10 text-amber-600'
                     : 'bg-accent/10 text-accent'
                   }
                 >
                   {profile.role === 'founder' ? (
                     <><Lightbulb className="mr-1 h-3 w-3" /> Founder</>
+                  ) : profile.role === 'investor' ? (
+                    <><Users className="mr-1 h-3 w-3" /> Investor</>
                   ) : (
                     <><Users className="mr-1 h-3 w-3" /> Talent</>
                   )}

@@ -148,11 +148,15 @@ export default function PublicProfile() {
                     variant="secondary"
                     className={profile.role === 'founder'
                       ? 'bg-primary/10 text-primary'
+                      : profile.role === 'investor'
+                      ? 'bg-amber-500/10 text-amber-600'
                       : 'bg-accent/10 text-accent'
                     }
                   >
                     {profile.role === 'founder' ? (
                       <><Lightbulb className="mr-1 h-3 w-3" /> Founder</>
+                    ) : profile.role === 'investor' ? (
+                      <><Users className="mr-1 h-3 w-3" /> Investor</>
                     ) : (
                       <><Users className="mr-1 h-3 w-3" /> Talent</>
                     )}
@@ -214,6 +218,44 @@ export default function PublicProfile() {
               <div className="h-10 w-px bg-border hidden sm:block" />
               <IntentBadges profile={profile} size="md" />
             </div>
+
+            {/* Investor Info Section */}
+            {profile.role === 'investor' && (
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Lightbulb className="h-5 w-5 text-amber-600" />
+                    Investment Profile
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {profile.firm_name && (
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-1">Firm Name</p>
+                      <p className="font-medium">{profile.firm_name}</p>
+                    </div>
+                  )}
+                  {profile.investment_stage && (
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-1">Investment Stage Focus</p>
+                      <p className="font-medium">{profile.investment_stage}</p>
+                    </div>
+                  )}
+                  {profile.sectors && profile.sectors.length > 0 && (
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">Investment Sectors</p>
+                      <div className="flex flex-wrap gap-2">
+                        {profile.sectors.map((sector, index) => (
+                          <Badge key={index} variant="secondary">
+                            {sector}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Bio */}
             <Card className="mb-6">
