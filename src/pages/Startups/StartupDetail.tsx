@@ -40,7 +40,7 @@ import {
 function getAvatarUrl(avatarPath: string | null | undefined): string | undefined {
   if (!avatarPath) return undefined;
   if (avatarPath.startsWith('http')) return avatarPath;
-  
+
   const { data } = supabase.storage.from('avatars').getPublicUrl(avatarPath);
   return data.publicUrl;
 }
@@ -65,10 +65,10 @@ export default function StartupDetail() {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
-    
+
     const controller = new AbortController();
     abortControllerRef.current = controller;
-    
+
     const { data, error } = await supabase
       .from('startups')
       .select(`
@@ -113,7 +113,7 @@ export default function StartupDetail() {
 
   const handleExpressInterest = async () => {
     if (!user || !id) return;
-    
+
     // Race condition check: verify user is not already on team
     const { data: teamCheck } = await supabase
       .from('startup_team_members')
@@ -122,7 +122,7 @@ export default function StartupDetail() {
       .eq('user_id', user.id)
       .limit(1)
       .maybeSingle();
-    
+
     if (teamCheck) {
       toast({
         variant: 'destructive',
@@ -142,10 +142,11 @@ export default function StartupDetail() {
         .eq('user_id', user.id);
 
       if (error) {
+        const { normalizeError } = await import('@/lib/security');
         toast({
           variant: 'destructive',
           title: 'Error',
-          description: 'Failed to remove interest. Please try again.',
+          description: normalizeError(error),
         });
       } else {
         setHasExpressedInterest(false);
@@ -156,30 +157,53 @@ export default function StartupDetail() {
         fetchInterests();
       }
     } else {
-      setActionLoading(true);
+      // Check rate limit before expressing interest
+      const { checkRateLimit, logSecurityEvent } = await import('@/lib/security');
+      const rateLimitResult = await checkRateLimit(user.id, 'startup_interest');
+
+      if (!rateLimitResult.allowed) {
+        logSecurityEvent('rate_limit_exceeded', {
+          action: 'startup_interest',
+          userId: user.id
+        });
+        toast({
+          variant: 'destructive',
+          title: 'Too many requests',
+          description: 'Please wait before expressing interest in more startups.',
+        });
+        setActionLoading(false);
+        return;
+      }
+
       const interestType = profile?.role === 'investor' ? 'investor' : 'talent';
-      
-      // Try inserting with interest_type (new column), fall back without if column doesn't exist
+
+      // Use upsert for idempotency
       let insertData: any = { startup_id: id, user_id: user.id };
-      
+
       // Try with interest_type first
       let { error } = await supabase
         .from('startup_interests')
-        .insert({ ...insertData, interest_type: interestType });
+        .upsert({ ...insertData, interest_type: interestType }, {
+          onConflict: 'user_id,startup_id',
+          ignoreDuplicates: true,
+        });
 
       // If error about missing column, retry without it (fallback)
       if (error && error.message?.includes('interest_type')) {
         console.warn('interest_type column not yet available, inserting without it');
         const { error: fallbackError } = await supabase
           .from('startup_interests')
-          .insert(insertData);
-        
+          .upsert(insertData, {
+            onConflict: 'user_id,startup_id',
+            ignoreDuplicates: true,
+          });
+
         if (!fallbackError) {
           setHasExpressedInterest(true);
           const isInvestor = profile?.role === 'investor';
           toast({
             title: 'Interest expressed!',
-            description: isInvestor 
+            description: isInvestor
               ? 'The founder will be notified of your investor interest.'
               : 'The founder will be notified of your interest.',
           });
@@ -192,10 +216,11 @@ export default function StartupDetail() {
 
       if (error) {
         console.error('Express interest error:', error);
+        const { normalizeError } = await import('@/lib/security');
         toast({
           variant: 'destructive',
           title: 'Error',
-          description: error.message || 'Failed to express interest. Please try again.',
+          description: normalizeError(error),
         });
 
       } else {
@@ -203,7 +228,7 @@ export default function StartupDetail() {
         const isInvestor = profile?.role === 'investor';
         toast({
           title: 'Interest expressed!',
-          description: isInvestor 
+          description: isInvestor
             ? 'The founder will be notified of your investor interest.'
             : 'The founder will be notified of your interest.',
         });

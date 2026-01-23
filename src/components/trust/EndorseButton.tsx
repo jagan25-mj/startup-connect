@@ -68,12 +68,32 @@ export function EndorseButton({ userId, userName = 'this user', onEndorsementCha
                     description: `You removed your endorsement for ${userName}.`,
                 });
             } else {
-                // Add endorsement
+                // Check rate limit before adding endorsement
+                const { checkRateLimit, logSecurityEvent } = await import('@/lib/security');
+                const rateLimitResult = await checkRateLimit(user.id, 'endorsement');
+
+                if (!rateLimitResult.allowed) {
+                    logSecurityEvent('rate_limit_exceeded', {
+                        action: 'endorsement',
+                        userId: user.id
+                    });
+                    toast({
+                        variant: 'destructive',
+                        title: 'Too many endorsements',
+                        description: 'Please wait before endorsing more users.',
+                    });
+                    return;
+                }
+
+                // Add endorsement with conflict handling
                 const { error } = await supabase
                     .from('endorsements')
-                    .insert({
+                    .upsert({
                         endorser_id: user.id,
                         endorsed_id: userId,
+                    }, {
+                        onConflict: 'endorser_id,endorsed_id',
+                        ignoreDuplicates: true,
                     });
 
                 if (error) {
@@ -99,10 +119,11 @@ export function EndorseButton({ userId, userName = 'this user', onEndorsementCha
             onEndorsementChange?.();
         } catch (error) {
             console.error('Endorsement error:', error);
+            const { normalizeError } = await import('@/lib/security');
             toast({
                 variant: 'destructive',
                 title: 'Error',
-                description: 'Failed to update endorsement. Please try again.',
+                description: normalizeError(error),
             });
         } finally {
             setLoading(false);

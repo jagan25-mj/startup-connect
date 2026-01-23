@@ -63,16 +63,46 @@ export function ReportButton({ userId, userName = 'this user', variant = 'icon' 
             return;
         }
 
+        // Validate details length
+        if (details.length > 500) {
+            toast({
+                variant: 'destructive',
+                title: 'Details too long',
+                description: 'Please limit details to 500 characters.',
+            });
+            return;
+        }
+
         setLoading(true);
 
         try {
+            // Check rate limit
+            const { checkRateLimit, logSecurityEvent, normalizeError } = await import('@/lib/security');
+            const rateLimitResult = await checkRateLimit(user.id, 'report');
+
+            if (!rateLimitResult.allowed) {
+                logSecurityEvent('rate_limit_exceeded', {
+                    action: 'report',
+                    userId: user.id
+                });
+                toast({
+                    variant: 'destructive',
+                    title: 'Too many reports',
+                    description: 'Please wait before submitting more reports.',
+                });
+                return;
+            }
+
             const { error } = await supabase
                 .from('user_reports')
-                .insert({
+                .upsert({
                     reporter_id: user.id,
                     reported_id: userId,
                     reason,
                     details: details.trim() || null,
+                }, {
+                    onConflict: 'reporter_id,reported_id',
+                    ignoreDuplicates: true,
                 });
 
             if (error) {
@@ -97,10 +127,11 @@ export function ReportButton({ userId, userName = 'this user', variant = 'icon' 
             setDetails('');
         } catch (error) {
             console.error('Report error:', error);
+            const { normalizeError } = await import('@/lib/security');
             toast({
                 variant: 'destructive',
                 title: 'Error',
-                description: 'Failed to submit report. Please try again.',
+                description: normalizeError(error),
             });
         } finally {
             setLoading(false);

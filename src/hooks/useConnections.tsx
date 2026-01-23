@@ -108,11 +108,43 @@ export function useConnections() {
   const sendConnectionRequest = async (receiverId: string) => {
     if (!user) return { success: false };
 
+    // Prevent self-connection
+    if (user.id === receiverId) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid request',
+        description: 'You cannot connect with yourself.',
+      });
+      return { success: false };
+    }
+
+    // Check rate limit
+    const { checkRateLimit, RateLimitError, logSecurityEvent } = await import('@/lib/security');
+    const rateLimitResult = await checkRateLimit(user.id, 'connection_request');
+
+    if (!rateLimitResult.allowed) {
+      logSecurityEvent('rate_limit_exceeded', {
+        action: 'connection_request',
+        userId: user.id
+      });
+      toast({
+        variant: 'destructive',
+        title: 'Too many requests',
+        description: `Please wait before sending more connection requests. Try again in ${Math.ceil((rateLimitResult.resetAt.getTime() - Date.now()) / 60000)} minutes.`,
+      });
+      return { success: false };
+    }
+
+    // Use upsert to handle idempotency
     const { error } = await supabase
       .from('connections')
-      .insert({
+      .upsert({
         requester_id: user.id,
         receiver_id: receiverId,
+        status: 'pending',
+      }, {
+        onConflict: 'requester_id,receiver_id',
+        ignoreDuplicates: true,
       });
 
     if (error) {
@@ -123,10 +155,11 @@ export function useConnections() {
           description: 'A connection request already exists.',
         });
       } else {
+        const { normalizeError } = await import('@/lib/security');
         toast({
           variant: 'destructive',
           title: 'Error',
-          description: 'Failed to send connection request.',
+          description: normalizeError(error),
         });
       }
       return { success: false };
@@ -137,14 +170,14 @@ export function useConnections() {
       description: 'Your connection request has been sent.',
     });
     // Note: Email notifications disabled for MVP - only in-app notifications active
-    
+
     await fetchConnections();
     return { success: true };
   };
 
   const acceptConnection = async (connectionId: string) => {
     if (!user) return { success: false };
-    
+
     const { error } = await supabase
       .from('connections')
       .update({ status: 'accepted', updated_at: new Date().toISOString() })
@@ -164,7 +197,7 @@ export function useConnections() {
       description: 'You are now connected.',
     });
     // Note: Email notifications disabled for MVP - only in-app notifications active
-    
+
     await fetchConnections();
     return { success: true };
   };
@@ -188,7 +221,7 @@ export function useConnections() {
       title: 'Request rejected',
       description: 'The connection request has been rejected.',
     });
-    
+
     await fetchConnections();
     return { success: true };
   };
@@ -212,7 +245,7 @@ export function useConnections() {
       title: 'Connection removed',
       description: 'The connection has been removed.',
     });
-    
+
     await fetchConnections();
     return { success: true };
   };

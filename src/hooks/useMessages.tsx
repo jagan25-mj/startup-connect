@@ -27,9 +27,9 @@ export function useMessages(conversationId?: string) {
 
     if (!error && data) {
       const processedConversations = data.map((conv: any) => {
-        const otherParticipant = 
-          conv.participant_one === user.id 
-            ? conv.participant_two_profile 
+        const otherParticipant =
+          conv.participant_one === user.id
+            ? conv.participant_two_profile
             : conv.participant_one_profile;
 
         // Calculate unread count and find last message from already-fetched data
@@ -39,7 +39,7 @@ export function useMessages(conversationId?: string) {
 
         const lastMessage = (conv.messages || [])
           .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-          [0] || null;
+        [0] || null;
 
         return {
           ...conv,
@@ -69,7 +69,7 @@ export function useMessages(conversationId?: string) {
 
     if (!error && data) {
       setMessages(data as Message[]);
-      
+
       // Mark messages as read
       if (user) {
         await supabase
@@ -83,12 +83,36 @@ export function useMessages(conversationId?: string) {
   }, [conversationId, user]);
 
   const sendMessage = async (content: string) => {
-    if (!conversationId || !user || !content.trim()) return;
+    if (!conversationId || !user) return false;
+
+    // Validate content
+    const trimmedContent = content.trim();
+    if (!trimmedContent) {
+      return false;
+    }
+
+    // Check length limit
+    if (trimmedContent.length > 5000) {
+      console.warn('Message too long, truncating');
+      return false;
+    }
+
+    // Check rate limit
+    const { checkRateLimit, logSecurityEvent } = await import('@/lib/security');
+    const rateLimitResult = await checkRateLimit(user.id, 'message_send');
+
+    if (!rateLimitResult.allowed) {
+      logSecurityEvent('rate_limit_exceeded', {
+        action: 'message_send',
+        userId: user.id
+      });
+      return false;
+    }
 
     const { error } = await supabase.from('messages').insert({
       conversation_id: conversationId,
       sender_id: user.id,
-      content: content.trim(),
+      content: trimmedContent,
     });
 
     return !error;
@@ -144,7 +168,7 @@ export function useMessages(conversationId?: string) {
 
           if (data) {
             setMessages((prev) => [...prev, data as Message]);
-            
+
             // Mark as read if not sender
             if (user && data.sender_id !== user.id) {
               await supabase
