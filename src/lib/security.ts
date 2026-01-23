@@ -23,10 +23,14 @@ interface RateLimitResult {
   resetAt: Date;
 }
 
+// In-memory rate limiting storage (no API calls needed)
+// Resets when page reloads - for more persistent rate limiting, apply the database migration
+const rateLimitStore = new Map<string, { count: number; resetAt: Date }>();
+
 /**
  * Check if an action is rate limited for the current user
- * Uses SERVER-SIDE RPC function for enforcement that cannot be bypassed
- * PRODUCTION NOTE: Fails OPEN if database infrastructure isn't ready
+ * Uses IN-MEMORY rate limiting to avoid API calls
+ * For server-side enforcement, apply the database migration
  */
 export async function checkRateLimit(
   userId: string,
@@ -34,108 +38,36 @@ export async function checkRateLimit(
 ): Promise<RateLimitResult> {
   const limit = RATE_LIMITS[action];
   const now = new Date();
-  const resetAt = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour fallback
+  const resetAt = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour window
 
   // Skip rate limiting if no userId (not authenticated)
   if (!userId) {
     return { allowed: true, remaining: limit, resetAt };
   }
 
-  try {
-    // Call server-side RPC function for atomic rate limiting
-    const { data, error } = await supabase.rpc('check_and_increment_rate_limit', {
-      p_action: action,
-      p_limit: limit,
-    });
+  const key = `${userId}:${action}`;
+  const record = rateLimitStore.get(key);
 
-    if (error) {
-      // RPC not available (migration not applied) - fail OPEN for now
-      // This allows the app to work before migrations are applied
-      console.warn('[RateLimit] RPC not available, allowing request:', error.code);
-      return { allowed: true, remaining: limit, resetAt };
-    }
-
-    // Parse RPC response
-    const result = data as { allowed: boolean; remaining: number; reset_at?: string; error?: string };
-
-    if (result.error) {
-      // RPC returned an error - fail OPEN for production stability
-      console.warn('[RateLimit] RPC error:', result.error);
-      return { allowed: true, remaining: limit, resetAt };
-    }
-
-    return {
-      allowed: result.allowed,
-      remaining: result.remaining,
-      resetAt: result.reset_at ? new Date(result.reset_at) : resetAt,
-    };
-  } catch (err) {
-    // Network or other error - fail OPEN for production stability
-    console.warn('[RateLimit] Check failed, allowing request:', err);
-    return { allowed: true, remaining: limit, resetAt };
+  // No existing record - create one
+  if (!record) {
+    rateLimitStore.set(key, { count: 1, resetAt });
+    return { allowed: true, remaining: limit - 1, resetAt };
   }
-}
 
-/**
- * Fallback rate limiting using direct table access
- * Only used if server-side RPC is not available (e.g., migration not applied)
- */
-async function checkRateLimitFallback(
-  userId: string,
-  action: RateLimitAction
-): Promise<RateLimitResult> {
-  const limit = RATE_LIMITS[action];
-  const windowMs = 60 * 60 * 1000; // 1 hour
-  const now = new Date();
-  const resetAt = new Date(now.getTime() + windowMs);
-
-  try {
-    const { data, error } = await supabase
-      .from('rate_limits')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('action', action)
-      .maybeSingle();
-
-    if (error) {
-      // Fail CLOSED - reject the request
-      return { allowed: false, remaining: 0, resetAt };
-    }
-
-    if (!data) {
-      await supabase.from('rate_limits').insert({
-        user_id: userId,
-        action,
-        count: 1,
-        reset_at: resetAt.toISOString(),
-      });
-      return { allowed: true, remaining: limit - 1, resetAt };
-    }
-
-    const recordResetAt = new Date(data.reset_at);
-
-    if (recordResetAt < now) {
-      await supabase
-        .from('rate_limits')
-        .update({ count: 1, reset_at: resetAt.toISOString() })
-        .eq('id', data.id);
-      return { allowed: true, remaining: limit - 1, resetAt };
-    }
-
-    if (data.count >= limit) {
-      return { allowed: false, remaining: 0, resetAt: recordResetAt };
-    }
-
-    await supabase
-      .from('rate_limits')
-      .update({ count: data.count + 1 })
-      .eq('id', data.id);
-
-    return { allowed: true, remaining: limit - data.count - 1, resetAt: recordResetAt };
-  } catch (err) {
-    // Fail CLOSED - reject on error
-    return { allowed: false, remaining: 0, resetAt };
+  // Window expired - reset
+  if (record.resetAt < now) {
+    rateLimitStore.set(key, { count: 1, resetAt });
+    return { allowed: true, remaining: limit - 1, resetAt };
   }
+
+  // Check if limit exceeded
+  if (record.count >= limit) {
+    return { allowed: false, remaining: 0, resetAt: record.resetAt };
+  }
+
+  // Increment count
+  record.count++;
+  return { allowed: true, remaining: limit - record.count, resetAt: record.resetAt };
 }
 
 /**
